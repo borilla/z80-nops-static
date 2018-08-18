@@ -1,0 +1,2088 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>z80 Instruction Set</title>
+<meta charset="utf-8">
+<meta http-equiv="Cache-control" content="public max-age=31536000">
+<link rel="canonical" href="z80.html">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<style>
+	body {
+		margin: 0 0.4em 1em 0.4em;
+	}
+
+	body,
+	table {
+		font-family: sans-serif;
+		font-size: large;
+	}
+
+	a {
+		color: inherit;
+	}
+
+	h1 {
+		margin: 0;
+		padding: 0.8em 0 0 0;
+		text-align: center;
+	}
+
+	.shortcuts,
+	.instruction-table {
+		font-family: monospace;
+		margin: 1.5em auto 0.2em auto;
+		max-width: 30em;
+		width: 100%;
+	}
+
+	.shortcuts ul {
+		list-style-type: none;
+		margin: 0 -0.2em;
+		overflow: hidden;
+		padding: 0;
+	}
+
+	.shortcuts li {
+		float: left;
+	}
+
+	.shortcuts a {
+		background: rgba(255,0,0,0.1);
+		border: 1px solid rgba(255,0,0,0.3);
+		color: red;
+		display: inline-block;
+		margin: 0.2em;
+		min-width: 2.2em;
+		padding: 0.1em 0.2em;
+		text-align: center;
+		text-decoration: none;
+	}
+
+	.shortcuts a:hover {
+		border-color: black;
+		color: black;
+	}
+
+	.instruction-table {
+		background-color: rgba(0,0,255,0.1);
+		border-collapse: collapse;
+		border: 1px solid #ccc;
+	}
+
+	.instruction-table tbody tr:nth-child(odd) {
+		background-color: rgba(255,255,255,0.4);
+	}
+
+	.instruction-table td {
+		padding: 0.1em 0.4em;
+		text-align: left;
+		white-space: nowrap;
+	}
+
+	.instruction-table th {
+		border-bottom: 1px solid #ccc;
+		color: #666;
+		font-weight: normal;
+		font-size: medium;
+		padding: 0.2em 0.4em;
+		text-align: left;
+	}
+
+	.instruction-table th:nth-child(1) {
+		width: 45%;
+	}
+
+	.instruction-table th:nth-child(2) {
+		width: 25%;
+	}
+
+	.instruction-table th[colspan] {
+		border-bottom-style: none;
+		color: black;
+		font-weight: bold;
+		font-size: x-large;
+		padding: 0.2em 0.4em 0 0.4em;
+		text-align: center;
+		width: initial;
+	}
+
+	.instruction-table b {
+		color: red;
+		font-weight: normal;
+	}
+
+	footer {
+		color: #666;
+		font-size: small;
+		margin-top: 1.5em;
+		text-align: center;
+	}
+
+	.fixed {
+		bottom: 0;
+		left: 0;
+		position: fixed;
+		width: 100%;
+	}
+
+	.fixed-inner {
+		margin: auto;
+		max-width: 35em;
+		position: relative;
+	}
+
+	.scroll-to-top,
+	.quick-search {
+		background-color: rgba(102, 102, 255, 0.7); /* #66f */
+		border-radius: 1.1em;
+		border: 2px solid;
+		bottom: 0.2em;
+		color: white;
+		font-size: x-large;
+		height: 2em;
+		position: absolute;
+		text-align: center;
+		transition: width 0.2s;
+		width: 2em;
+	}
+
+	.icon-button {
+		cursor: pointer;
+		fill: currentColor;
+		height: 1em;
+		padding: 0.5em;
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 1em;
+	}
+
+	.scroll-to-top {
+		left: 0.2em;
+	}
+
+	.no-js .scroll-to-top {
+		left: initial;
+		right: 0.2em;
+	}
+
+	.quick-search {
+		right: 0.2em;
+	}
+
+	.no-js .quick-search,
+	.quick-search .close-button,
+	.quick-search input {
+		display: none;
+	}
+
+	.quick-search input {
+		animation: delay-appear 0.2s;
+		border-radius: 0.6em;
+		border-style: none;
+		font-size: inherit;
+		left: 0;
+		line-height: 1.4em;
+		margin: 0.3em 0 0.3em 0.4em;
+		outline-style: none;
+		padding: 0 0.5em;
+		position: absolute;
+		top: 0;
+		width: 5em;
+	}
+
+	.quick-search.open {
+		width: 8.2em;
+	}
+
+	.quick-search.open .close-button,
+	.quick-search.open input {
+		display: block;
+	}
+
+	.quick-search.open .search-button {
+		display: none;
+	}
+
+	svg {
+		text-align: center;
+		height: 32px;
+		width: 140px;
+		fill: transparent;
+		stroke: #333;
+		stroke-width: 1;
+		shape-rendering: crispEdges;
+		vertical-align: middle;
+	}
+
+	#svg-sla,
+	#svg-sll,
+	#svg-srl {
+		height: 22px;
+	}
+
+	svg text {
+		fill: #333;
+		stroke: none;
+		font-family: sans-serif;
+		font-size: 14px;
+		font-weight: normal;
+		alignment-baseline: central;
+		dominant-baseline: central;
+		text-anchor: middle;
+	}
+
+	svg .arrow {
+		marker-end: url(#svg-arrow-head);
+	}
+
+	@keyframes delay-appear {
+		0% { opacity: 0; }
+		99% { opacity: 0; }
+		100% { opacity: 1; }
+	}
+</style>
+</head>
+<body class="no-js">
+<script>
+	document.body.classList.remove('no-js');
+</script>
+
+<h1 id="title">Z80 Instruction Set</h1>
+
+<div class="shortcuts">
+<ul>
+	<li><a href="#adc">adc</a></li>
+	<li><a href="#add">add</a></li>
+	<li><a href="#and">and</a></li>
+</ul>
+<ul>
+	<li><a href="#bit">bit</a></li>
+</ul>
+<ul>
+	<li><a href="#call">call</a></li>
+	<li><a href="#ccf">ccf</a></li>
+	<li><a href="#cp">cp</a></li>
+	<li><a href="#cpd">cpd</a></li>
+	<li><a href="#cpdr">cpdr</a></li>
+	<li><a href="#cpi">cpi</a></li>
+	<li><a href="#cpir">cpir</a></li>
+	<li><a href="#cpl">cpl</a></li>
+</ul>
+<ul>
+	<li><a href="#daa">daa</a></li>
+	<li><a href="#dec">dec</a></li>
+	<li><a href="#di">di</a></li>
+	<li><a href="#djnz">djnz</a></li>
+</ul>
+<ul>
+	<li><a href="#ei">ei</a></li>
+	<li><a href="#ex">ex</a></li>
+	<li><a href="#exx">exx</a></li>
+</ul>
+<ul>
+	<li><a href="#halt">halt</a></li>
+</ul>
+<ul>
+	<li><a href="#im">im</a></li>
+	<li><a href="#in">in</a></li>
+	<li><a href="#inc">inc</a></li>
+	<li><a href="#ind">ind</a></li>
+	<li><a href="#indr">indr</a></li>
+	<li><a href="#ini">ini</a></li>
+	<li><a href="#inir">inir</a></li>
+</ul>
+<ul>
+	<li><a href="#jp">jp</a></li>
+	<li><a href="#jr">jr</a></li>
+</ul>
+<ul>
+	<li><a href="#ld">ld</a></li>
+	<li><a href="#ldd">ldd</a></li>
+	<li><a href="#lddr">lddr</a></li>
+	<li><a href="#ldi">ldi</a></li>
+	<li><a href="#ldir">ldir</a></li>
+</ul>
+<ul>
+	<li><a href="#neg">neg</a></li>
+	<li><a href="#nop">nop</a></li>
+</ul>
+<ul>
+	<li><a href="#or">or</a></li>
+	<li><a href="#otdr">otdr</a></li>
+	<li><a href="#otir">otir</a></li>
+	<li><a href="#out">out</a></li>
+	<li><a href="#outd">outd</a></li>
+	<li><a href="#outi">outi</a></li>
+</ul>
+<ul>
+	<li><a href="#pop">pop</a></li>
+	<li><a href="#push">push</a></li>
+</ul>
+<ul>
+	<li><a href="#res">res</a></li>
+	<li><a href="#ret">ret</a></li>
+	<li><a href="#reti">reti</a></li>
+	<li><a href="#retn">retn</a></li>
+	<li><a href="#rl">rl</a></li>
+	<li><a href="#rla">rla</a></li>
+	<li><a href="#rlc">rlc</a></li>
+	<li><a href="#rlca">rlca</a></li>
+	<li><a href="#rld">rld</a></li>
+	<li><a href="#rr">rr</a></li>
+	<li><a href="#rra">rra</a></li>
+	<li><a href="#rrc">rrc</a></li>
+	<li><a href="#rrca">rrca</a></li>
+	<li><a href="#rrd">rrd</a></li>
+	<li><a href="#rst">rst</a></li>
+</ul>
+<ul>
+	<li><a href="#sbc">sbc</a></li>
+	<li><a href="#scf">scf</a></li>
+	<li><a href="#set">set</a></li>
+	<li><a href="#sla">sla</a></li>
+	<li><a href="#sll">sll</a></li>
+	<li><a href="#sra">sra</a></li>
+	<li><a href="#srl">srl</a></li>
+	<li><a href="#sub">sub</a></li>
+</ul>
+<ul>
+	<li><a href="#xor">xor</a></li>
+</ul>
+</div>
+
+<svg style="width: 0; height: 0; position: absolute">
+	<defs>
+		<marker id="svg-arrow-head" markerWidth="8" markerHeight="8" stroke-width="1" refX="8" refY="4" orient="auto">
+			<path d="M 0 0 L 8 4 L 0 8" />
+		</marker>
+
+		<g id="svg-register">
+			<rect x="-30" y="-10" width="60" height="20"/>
+			<text x="-20">7</text>
+			<text x="20">0</text>
+		</g>
+
+		<g id="svg-carry">
+			<rect x="-10" y="-10" width="20" height="20"/>
+			<text>C</text>
+		</g>
+
+		<g id="svg-shift-left">
+			<use href="#svg-register" x="10" />
+			<use href="#svg-carry" x="-50" />
+			<path d="M 60 0 h -20" class="arrow" />
+			<path d="M 20 0 h -20" class="arrow" />
+			<path d="M -20 0 h -20" class="arrow" />
+		</g>
+
+		<g id="svg-shift-right">
+			<use href="#svg-register" x="-10" />
+			<use href="#svg-carry" x="50" />
+			<path d="M -60 0 h 20" class="arrow" />
+			<path d="M -20 0 h 20" class="arrow" />
+			<path d="M 20 0 h 20" class="arrow" />
+		</g>
+	</defs>
+</svg>
+
+<table class="instruction-table" id="adc">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:adc" title="adc at z80-heaven">adc</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>adc</b> a,(hl)	</td><td>	2	</td><td>	8e		</td></tr>
+<tr><td>	<b>adc</b> a,(ix+nn)	</td><td>	5	</td><td>	dd 8e nn	</td></tr>
+<tr><td>	<b>adc</b> a,(iy+nn)	</td><td>	5	</td><td>	fd 8e nn	</td></tr>
+<tr><td>	<b>adc</b> a,a		</td><td>	1	</td><td>	8f		</td></tr>
+<tr><td>	<b>adc</b> a,b		</td><td>	1	</td><td>	88		</td></tr>
+<tr><td>	<b>adc</b> a,c		</td><td>	1	</td><td>	89		</td></tr>
+<tr><td>	<b>adc</b> a,d		</td><td>	1	</td><td>	8a		</td></tr>
+<tr><td>	<b>adc</b> a,e		</td><td>	1	</td><td>	8b		</td></tr>
+<tr><td>	<b>adc</b> a,h		</td><td>	1	</td><td>	8c		</td></tr>
+<tr><td>	<b>adc</b> a,ixh	</td><td>	2	</td><td>	dd 8c		</td></tr>
+<tr><td>	<b>adc</b> a,iyh	</td><td>	2	</td><td>	fd 8c		</td></tr>
+<tr><td>	<b>adc</b> a,l		</td><td>	1	</td><td>	8d		</td></tr>
+<tr><td>	<b>adc</b> a,ixl	</td><td>	2	</td><td>	dd 8d		</td></tr>
+<tr><td>	<b>adc</b> a,iyl	</td><td>	2	</td><td>	fd 8d		</td></tr>
+<tr><td>	<b>adc</b> a,nn	</td><td>	2	</td><td>	ce nn		</td></tr>
+<tr><td>	<b>adc</b> hl,bc	</td><td>	4	</td><td>	ed 4a		</td></tr>
+<tr><td>	<b>adc</b> hl,de	</td><td>	4	</td><td>	ed 5a		</td></tr>
+<tr><td>	<b>adc</b> hl,hl	</td><td>	4	</td><td>	ed 6a		</td></tr>
+<tr><td>	<b>adc</b> hl,sp	</td><td>	4	</td><td>	ed 7a		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="add">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:add" title="add at z80-heaven">add</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>add</b> a,(hl)	</td><td>	2	</td><td>	86		</td></tr>
+<tr><td>	<b>add</b> a,(ix+nn)	</td><td>	5	</td><td>	dd 86 nn	</td></tr>
+<tr><td>	<b>add</b> a,(iy+nn)	</td><td>	5	</td><td>	fd 86 nn	</td></tr>
+<tr><td>	<b>add</b> a,a		</td><td>	1	</td><td>	87		</td></tr>
+<tr><td>	<b>add</b> a,b		</td><td>	1	</td><td>	80		</td></tr>
+<tr><td>	<b>add</b> a,c		</td><td>	1	</td><td>	81		</td></tr>
+<tr><td>	<b>add</b> a,d		</td><td>	1	</td><td>	82		</td></tr>
+<tr><td>	<b>add</b> a,e		</td><td>	1	</td><td>	83		</td></tr>
+<tr><td>	<b>add</b> a,h		</td><td>	1	</td><td>	84		</td></tr>
+<tr><td>	<b>add</b> a,ixh	</td><td>	2	</td><td>	dd 84		</td></tr>
+<tr><td>	<b>add</b> a,iyh	</td><td>	2	</td><td>	fd 84		</td></tr>
+<tr><td>	<b>add</b> a,l		</td><td>	1	</td><td>	85		</td></tr>
+<tr><td>	<b>add</b> a,ixl	</td><td>	2	</td><td>	dd 85		</td></tr>
+<tr><td>	<b>add</b> a,iyl	</td><td>	2	</td><td>	fd 85		</td></tr>
+<tr><td>	<b>add</b> a,nn	</td><td>	2	</td><td>	c6 nn		</td></tr>
+<tr><td>	<b>add</b> hl,bc	</td><td>	3	</td><td>	09		</td></tr>
+<tr><td>	<b>add</b> hl,de	</td><td>	3	</td><td>	19		</td></tr>
+<tr><td>	<b>add</b> hl,hl	</td><td>	3	</td><td>	29		</td></tr>
+<tr><td>	<b>add</b> hl,sp	</td><td>	3	</td><td>	39		</td></tr>
+<tr><td>	<b>add</b> ix,bc	</td><td>	4	</td><td>	dd 09		</td></tr>
+<tr><td>	<b>add</b> ix,de	</td><td>	4	</td><td>	dd 19		</td></tr>
+<tr><td>	<b>add</b> ix,ix	</td><td>	4	</td><td>	dd 29		</td></tr>
+<tr><td>	<b>add</b> ix,sp	</td><td>	4	</td><td>	dd 39		</td></tr>
+<tr><td>	<b>add</b> iy,bc	</td><td>	4	</td><td>	fd 09		</td></tr>
+<tr><td>	<b>add</b> iy,de	</td><td>	4	</td><td>	fd 19		</td></tr>
+<tr><td>	<b>add</b> iy,iy	</td><td>	4	</td><td>	fd 29		</td></tr>
+<tr><td>	<b>add</b> iy,sp	</td><td>	4	</td><td>	fd 39		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="and">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:and" title="and at z80-heaven">and</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>and</b> (hl)	</td><td>	2	</td><td>	a6		</td></tr>
+<tr><td>	<b>and</b> (ix+nn)	</td><td>	5	</td><td>	dd a6 nn	</td></tr>
+<tr><td>	<b>and</b> (iy+nn)	</td><td>	5	</td><td>	fd a6 nn	</td></tr>
+<tr><td>	<b>and</b> a		</td><td>	1	</td><td>	a7		</td></tr>
+<tr><td>	<b>and</b> b		</td><td>	1	</td><td>	a0		</td></tr>
+<tr><td>	<b>and</b> c		</td><td>	1	</td><td>	a1		</td></tr>
+<tr><td>	<b>and</b> d		</td><td>	1	</td><td>	a2		</td></tr>
+<tr><td>	<b>and</b> e		</td><td>	1	</td><td>	a3		</td></tr>
+<tr><td>	<b>and</b> h		</td><td>	1	</td><td>	a4		</td></tr>
+<tr><td>	<b>and</b> ixh		</td><td>	2	</td><td>	dd a4		</td></tr>
+<tr><td>	<b>and</b> iyh		</td><td>	2	</td><td>	fd a4		</td></tr>
+<tr><td>	<b>and</b> l		</td><td>	1	</td><td>	a5		</td></tr>
+<tr><td>	<b>and</b> ixl		</td><td>	2	</td><td>	dd a5		</td></tr>
+<tr><td>	<b>and</b> iyl		</td><td>	2	</td><td>	fd a5		</td></tr>
+<tr><td>	<b>and</b> nn		</td><td>	2	</td><td>	e6 nn		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="bit">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:bit" title="bit at z80-heaven">bit</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>bit</b> 0,(hl)	</td><td>	3	</td><td>	cb 46		</td></tr>
+<tr><td>	<b>bit</b> 0,(ix+nn)	</td><td>	6	</td><td>	dd cb nn 46	</td></tr>
+<tr><td>	<b>bit</b> 0,(iy+nn)	</td><td>	6	</td><td>	fd cb nn 46	</td></tr>
+<tr><td>	<b>bit</b> 0,a		</td><td>	2	</td><td>	cb 47		</td></tr>
+<tr><td>	<b>bit</b> 0,b		</td><td>	2	</td><td>	cb 40		</td></tr>
+<tr><td>	<b>bit</b> 0,c		</td><td>	2	</td><td>	cb 41		</td></tr>
+<tr><td>	<b>bit</b> 0,d		</td><td>	2	</td><td>	cb 42		</td></tr>
+<tr><td>	<b>bit</b> 0,e		</td><td>	2	</td><td>	cb 43		</td></tr>
+<tr><td>	<b>bit</b> 0,h		</td><td>	2	</td><td>	cb 44		</td></tr>
+<tr><td>	<b>bit</b> 0,l		</td><td>	2	</td><td>	cb 45		</td></tr>
+<tr><td>	<b>bit</b> 1,(hl)	</td><td>	3	</td><td>	cb 4e		</td></tr>
+<tr><td>	<b>bit</b> 1,(ix+nn)	</td><td>	6	</td><td>	dd cb nn 4e	</td></tr>
+<tr><td>	<b>bit</b> 1,(iy+nn)	</td><td>	6	</td><td>	fd cb nn 4e	</td></tr>
+<tr><td>	<b>bit</b> 1,a		</td><td>	2	</td><td>	cb 4f		</td></tr>
+<tr><td>	<b>bit</b> 1,b		</td><td>	2	</td><td>	cb 48		</td></tr>
+<tr><td>	<b>bit</b> 1,c		</td><td>	2	</td><td>	cb 49		</td></tr>
+<tr><td>	<b>bit</b> 1,d		</td><td>	2	</td><td>	cb 4a		</td></tr>
+<tr><td>	<b>bit</b> 1,e		</td><td>	2	</td><td>	cb 4b		</td></tr>
+<tr><td>	<b>bit</b> 1,h		</td><td>	2	</td><td>	cb 4c		</td></tr>
+<tr><td>	<b>bit</b> 1,l		</td><td>	2	</td><td>	cb 4d		</td></tr>
+<tr><td>	<b>bit</b> 2,(hl)	</td><td>	3	</td><td>	cb 56		</td></tr>
+<tr><td>	<b>bit</b> 2,(ix+nn)	</td><td>	6	</td><td>	dd cb nn 56	</td></tr>
+<tr><td>	<b>bit</b> 2,(iy+nn)	</td><td>	6	</td><td>	fd cb nn 56	</td></tr>
+<tr><td>	<b>bit</b> 2,a		</td><td>	2	</td><td>	cb 57		</td></tr>
+<tr><td>	<b>bit</b> 2,b		</td><td>	2	</td><td>	cb 50		</td></tr>
+<tr><td>	<b>bit</b> 2,c		</td><td>	2	</td><td>	cb 51		</td></tr>
+<tr><td>	<b>bit</b> 2,d		</td><td>	2	</td><td>	cb 52		</td></tr>
+<tr><td>	<b>bit</b> 2,e		</td><td>	2	</td><td>	cb 53		</td></tr>
+<tr><td>	<b>bit</b> 2,h		</td><td>	2	</td><td>	cb 54		</td></tr>
+<tr><td>	<b>bit</b> 2,l		</td><td>	2	</td><td>	cb 55		</td></tr>
+<tr><td>	<b>bit</b> 3,(hl)	</td><td>	3	</td><td>	cb 5e		</td></tr>
+<tr><td>	<b>bit</b> 3,(ix+nn)	</td><td>	6	</td><td>	dd cb nn 5e	</td></tr>
+<tr><td>	<b>bit</b> 3,(iy+nn)	</td><td>	6	</td><td>	fd cb nn 5e	</td></tr>
+<tr><td>	<b>bit</b> 3,a		</td><td>	2	</td><td>	cb 5f		</td></tr>
+<tr><td>	<b>bit</b> 3,b		</td><td>	2	</td><td>	cb 58		</td></tr>
+<tr><td>	<b>bit</b> 3,c		</td><td>	2	</td><td>	cb 59		</td></tr>
+<tr><td>	<b>bit</b> 3,d		</td><td>	2	</td><td>	cb 5a		</td></tr>
+<tr><td>	<b>bit</b> 3,e		</td><td>	2	</td><td>	cb 5b		</td></tr>
+<tr><td>	<b>bit</b> 3,h		</td><td>	2	</td><td>	cb 5c		</td></tr>
+<tr><td>	<b>bit</b> 3,l		</td><td>	2	</td><td>	cb 5d		</td></tr>
+<tr><td>	<b>bit</b> 4,(hl)	</td><td>	3	</td><td>	cb 66		</td></tr>
+<tr><td>	<b>bit</b> 4,(ix+nn)	</td><td>	6	</td><td>	dd cb nn 66	</td></tr>
+<tr><td>	<b>bit</b> 4,(iy+nn)	</td><td>	6	</td><td>	fd cb nn 66	</td></tr>
+<tr><td>	<b>bit</b> 4,a		</td><td>	2	</td><td>	cb 67		</td></tr>
+<tr><td>	<b>bit</b> 4,b		</td><td>	2	</td><td>	cb 60		</td></tr>
+<tr><td>	<b>bit</b> 4,c		</td><td>	2	</td><td>	cb 61		</td></tr>
+<tr><td>	<b>bit</b> 4,d		</td><td>	2	</td><td>	cb 62		</td></tr>
+<tr><td>	<b>bit</b> 4,e		</td><td>	2	</td><td>	cb 63		</td></tr>
+<tr><td>	<b>bit</b> 4,h		</td><td>	2	</td><td>	cb 64		</td></tr>
+<tr><td>	<b>bit</b> 4,l		</td><td>	2	</td><td>	cb 65		</td></tr>
+<tr><td>	<b>bit</b> 5,(hl)	</td><td>	3	</td><td>	cb 6e		</td></tr>
+<tr><td>	<b>bit</b> 5,(ix+nn)	</td><td>	6	</td><td>	dd cb nn 6e	</td></tr>
+<tr><td>	<b>bit</b> 5,(iy+nn)	</td><td>	6	</td><td>	fd cb nn 6e	</td></tr>
+<tr><td>	<b>bit</b> 5,a		</td><td>	2	</td><td>	cb 6f		</td></tr>
+<tr><td>	<b>bit</b> 5,b		</td><td>	2	</td><td>	cb 68		</td></tr>
+<tr><td>	<b>bit</b> 5,c		</td><td>	2	</td><td>	cb 69		</td></tr>
+<tr><td>	<b>bit</b> 5,d		</td><td>	2	</td><td>	cb 6a		</td></tr>
+<tr><td>	<b>bit</b> 5,e		</td><td>	2	</td><td>	cb 6b		</td></tr>
+<tr><td>	<b>bit</b> 5,h		</td><td>	2	</td><td>	cb 6c		</td></tr>
+<tr><td>	<b>bit</b> 5,l		</td><td>	2	</td><td>	cb 6d		</td></tr>
+<tr><td>	<b>bit</b> 6,(hl)	</td><td>	3	</td><td>	cb 76		</td></tr>
+<tr><td>	<b>bit</b> 6,(ix+nn)	</td><td>	6	</td><td>	dd cb nn 76	</td></tr>
+<tr><td>	<b>bit</b> 6,(iy+nn)	</td><td>	6	</td><td>	fd cb nn 76	</td></tr>
+<tr><td>	<b>bit</b> 6,a		</td><td>	2	</td><td>	cb 77		</td></tr>
+<tr><td>	<b>bit</b> 6,b		</td><td>	2	</td><td>	cb 70		</td></tr>
+<tr><td>	<b>bit</b> 6,c		</td><td>	2	</td><td>	cb 71		</td></tr>
+<tr><td>	<b>bit</b> 6,d		</td><td>	2	</td><td>	cb 72		</td></tr>
+<tr><td>	<b>bit</b> 6,e		</td><td>	2	</td><td>	cb 73		</td></tr>
+<tr><td>	<b>bit</b> 6,h		</td><td>	2	</td><td>	cb 74		</td></tr>
+<tr><td>	<b>bit</b> 6,l		</td><td>	2	</td><td>	cb 75		</td></tr>
+<tr><td>	<b>bit</b> 7,(hl)	</td><td>	3	</td><td>	cb 7e		</td></tr>
+<tr><td>	<b>bit</b> 7,(ix+nn)	</td><td>	6	</td><td>	dd cb nn 7e	</td></tr>
+<tr><td>	<b>bit</b> 7,(iy+nn)	</td><td>	6	</td><td>	fd cb nn 7e	</td></tr>
+<tr><td>	<b>bit</b> 7,a		</td><td>	2	</td><td>	cb 7f		</td></tr>
+<tr><td>	<b>bit</b> 7,b		</td><td>	2	</td><td>	cb 78		</td></tr>
+<tr><td>	<b>bit</b> 7,c		</td><td>	2	</td><td>	cb 79		</td></tr>
+<tr><td>	<b>bit</b> 7,d		</td><td>	2	</td><td>	cb 7a		</td></tr>
+<tr><td>	<b>bit</b> 7,e		</td><td>	2	</td><td>	cb 7b		</td></tr>
+<tr><td>	<b>bit</b> 7,h		</td><td>	2	</td><td>	cb 7c		</td></tr>
+<tr><td>	<b>bit</b> 7,l		</td><td>	2	</td><td>	cb 7d		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="call">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:call" title="call at z80-heaven">call</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>call</b> nnnn	</td><td>	5	</td><td>	cd nn nn	</td></tr>
+<tr><td>	<b>call</b> c,nnnn	</td><td>	3/5	</td><td>	dc nn nn	</td></tr>
+<tr><td>	<b>call</b> m,nnnn	</td><td>	3/5	</td><td>	fc nn nn	</td></tr>
+<tr><td>	<b>call</b> nc,nnnn	</td><td>	3/5	</td><td>	d4 nn nn	</td></tr>
+<tr><td>	<b>call</b> nz,nnnn	</td><td>	3/5	</td><td>	c4 nn nn	</td></tr>
+<tr><td>	<b>call</b> p,nnnn	</td><td>	3/5	</td><td>	f4 nn nn	</td></tr>
+<tr><td>	<b>call</b> pe,nnnn	</td><td>	3/5	</td><td>	ec nn nn	</td></tr>
+<tr><td>	<b>call</b> po,nnnn	</td><td>	3/5	</td><td>	e4 nn nn	</td></tr>
+<tr><td>	<b>call</b> z,nnnn	</td><td>	3/5	</td><td>	cc nn nn	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ccf">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ccf" title="ccf at z80-heaven">ccf</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ccf</b>		</td><td>	1	</td><td>	3f	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="cp">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:cp" title="cp at z80-heaven">cp</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>cp</b> (hl)		</td><td>	2	</td><td>	be		</td></tr>
+<tr><td>	<b>cp</b> (ix+nn)	</td><td>	5	</td><td>	dd be nn	</td></tr>
+<tr><td>	<b>cp</b> (iy+nn)	</td><td>	5	</td><td>	fd be nn	</td></tr>
+<tr><td>	<b>cp</b> a		</td><td>	1	</td><td>	bf		</td></tr>
+<tr><td>	<b>cp</b> b		</td><td>	1	</td><td>	b8		</td></tr>
+<tr><td>	<b>cp</b> c		</td><td>	1	</td><td>	b9		</td></tr>
+<tr><td>	<b>cp</b> d		</td><td>	1	</td><td>	ba		</td></tr>
+<tr><td>	<b>cp</b> e		</td><td>	1	</td><td>	bb		</td></tr>
+<tr><td>	<b>cp</b> h		</td><td>	1	</td><td>	bc		</td></tr>
+<tr><td>	<b>cp</b> l		</td><td>	1	</td><td>	bd		</td></tr>
+<tr><td>	<b>cp</b> nn		</td><td>	2	</td><td>	fe nn		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="cpd">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:cpd" title="cpd at z80-heaven">cpd</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>cpd</b>	</td><td>	5	</td><td>	ed a9	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="cpdr">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:cpdr" title="cpdr at z80-heaven">cpdr</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>cpdr</b>	</td><td>	5/6	</td><td>	ed b9	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="cpi">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:cpi" title="cpi at z80-heaven">cpi</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>cpi</b>	</td><td>	5	</td><td>	ed a1	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="cpir">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:cpir" title="cpir at z80-heaven">cpir</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>cpir</b>	</td><td>	5/6	</td><td>	ed b1	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="cpl">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:cpl" title="cpl at z80-heaven">cpl</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>cpl</b>	</td><td>	1	</td><td>	2f	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="daa">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:daa" title="daa at z80-heaven">daa</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>daa</b>	</td><td>	1	</td><td>	27	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="dec">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:dec" title="dec at z80-heaven">dec</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>dec</b> (hl)	</td><td>	3	</td><td>	35		</td></tr>
+<tr><td>	<b>dec</b> (ix+nn)	</td><td>	6	</td><td>	dd 35 nn	</td></tr>
+<tr><td>	<b>dec</b> (iy+nn)	</td><td>	6	</td><td>	fd 35 nn	</td></tr>
+<tr><td>	<b>dec</b> a		</td><td>	1	</td><td>	3d		</td></tr>
+<tr><td>	<b>dec</b> b		</td><td>	1	</td><td>	05		</td></tr>
+<tr><td>	<b>dec</b> bc		</td><td>	2	</td><td>	0b		</td></tr>
+<tr><td>	<b>dec</b> c		</td><td>	1	</td><td>	0d		</td></tr>
+<tr><td>	<b>dec</b> d		</td><td>	1	</td><td>	15		</td></tr>
+<tr><td>	<b>dec</b> de		</td><td>	2	</td><td>	1b		</td></tr>
+<tr><td>	<b>dec</b> e		</td><td>	1	</td><td>	1d		</td></tr>
+<tr><td>	<b>dec</b> h		</td><td>	1	</td><td>	25		</td></tr>
+<tr><td>	<b>dec</b> ixh		</td><td>	2	</td><td>	dd 25		</td></tr>
+<tr><td>	<b>dec</b> iyh		</td><td>	2	</td><td>	fd 25		</td></tr>
+<tr><td>	<b>dec</b> hl		</td><td>	2	</td><td>	2b		</td></tr>
+<tr><td>	<b>dec</b> ix		</td><td>	3	</td><td>	dd 2b		</td></tr>
+<tr><td>	<b>dec</b> iy		</td><td>	3	</td><td>	fd 2b		</td></tr>
+<tr><td>	<b>dec</b> l		</td><td>	1	</td><td>	2d		</td></tr>
+<tr><td>	<b>dec</b> ixl		</td><td>	2	</td><td>	dd 2d		</td></tr>
+<tr><td>	<b>dec</b> iyl		</td><td>	2	</td><td>	fd 2d		</td></tr>
+<tr><td>	<b>dec</b> sp		</td><td>	2	</td><td>	3b		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="di">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:di" title="di at z80-heaven">di</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>di</b>	</td><td>	1	</td><td>	f3	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="djnz">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:djnz" title="djnz at z80-heaven">djnz</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>djnz</b> nn	</td><td>	3/4	</td><td>	10 nn	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ei">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ei" title="ei at z80-heaven">ei</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ei</b>	</td><td>	1	</td><td>	fb	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ex">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ex" title="ex at z80-heaven">ex</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ex</b> (sp),hl	</td><td>	6	</td><td>	e3	</td></tr>
+<tr><td>	<b>ex</b> (sp),ix	</td><td>	7	</td><td>	dd e3	</td></tr>
+<tr><td>	<b>ex</b> (sp),iy	</td><td>	7	</td><td>	fd e3	</td></tr>
+<tr><td>	<b>ex</b> af,af'	</td><td>	1	</td><td>	08	</td></tr>
+<tr><td>	<b>ex</b> de,hl	</td><td>	1	</td><td>	eb	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="exx">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:exx" title="exx at z80-heaven">exx</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>exx</b>	</td><td>	1	</td><td>	d9	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="halt">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:halt" title="halt at z80-heaven">halt</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>halt</b>	</td><td>	1 + x	</td><td>	76	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="im">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:im" title="im at z80-heaven">im</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>im</b> 0	</td><td>	2	</td><td>	ed 46	</td></tr>
+<tr><td>	<b>im</b> 1	</td><td>	2	</td><td>	ed 56	</td></tr>
+<tr><td>	<b>im</b> 2	</td><td>	2	</td><td>	ed 5e	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="in">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:in" title="in at z80-heaven">in</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>in</b> a,(c)	</td><td>	4	</td><td>	ed 78	</td></tr>
+<tr><td>	<b>in</b> a,(nn)	</td><td>	3	</td><td>	db nn	</td></tr>
+<tr><td>	<b>in</b> b,(c)	</td><td>	4	</td><td>	ed 40	</td></tr>
+<tr><td>	<b>in</b> c,(c)	</td><td>	4	</td><td>	ed 48	</td></tr>
+<tr><td>	<b>in</b> d,(c)	</td><td>	4	</td><td>	ed 50	</td></tr>
+<tr><td>	<b>in</b> e,(c)	</td><td>	4	</td><td>	ed 58	</td></tr>
+<tr><td>	<b>in</b> f,(c)	</td><td>	4	</td><td>	ed 70	</td></tr>
+<tr><td>	<b>in</b> h,(c)	</td><td>	4	</td><td>	ed 60	</td></tr>
+<tr><td>	<b>in</b> l,(c)	</td><td>	4	</td><td>	ed 68	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="inc">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:inc" title="inc at z80-heaven">inc</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>inc</b> (hl)	</td><td>	3	</td><td>	34		</td></tr>
+<tr><td>	<b>inc</b> (ix+nn)	</td><td>	6	</td><td>	dd 34 nn	</td></tr>
+<tr><td>	<b>inc</b> (iy+nn)	</td><td>	6	</td><td>	fd 34 nn	</td></tr>
+<tr><td>	<b>inc</b> a		</td><td>	1	</td><td>	3c		</td></tr>
+<tr><td>	<b>inc</b> b		</td><td>	1	</td><td>	04		</td></tr>
+<tr><td>	<b>inc</b> bc		</td><td>	2	</td><td>	03		</td></tr>
+<tr><td>	<b>inc</b> c		</td><td>	1	</td><td>	0c		</td></tr>
+<tr><td>	<b>inc</b> d		</td><td>	1	</td><td>	14		</td></tr>
+<tr><td>	<b>inc</b> de		</td><td>	2	</td><td>	13		</td></tr>
+<tr><td>	<b>inc</b> e		</td><td>	1	</td><td>	1c		</td></tr>
+<tr><td>	<b>inc</b> h		</td><td>	1	</td><td>	24		</td></tr>
+<tr><td>	<b>inc</b> ixh		</td><td>	2	</td><td>	dd 24		</td></tr>
+<tr><td>	<b>inc</b> iyh		</td><td>	2	</td><td>	fd 24		</td></tr>
+<tr><td>	<b>inc</b> hl		</td><td>	2	</td><td>	23		</td></tr>
+<tr><td>	<b>inc</b> ix		</td><td>	3	</td><td>	dd 23		</td></tr>
+<tr><td>	<b>inc</b> iy		</td><td>	3	</td><td>	fd 23		</td></tr>
+<tr><td>	<b>inc</b> l		</td><td>	1	</td><td>	2c		</td></tr>
+<tr><td>	<b>inc</b> ixl		</td><td>	2	</td><td>	dd 2c		</td></tr>
+<tr><td>	<b>inc</b> iyl		</td><td>	2	</td><td>	fd 2c		</td></tr>
+<tr><td>	<b>inc</b> sp		</td><td>	2	</td><td>	33		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ind">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ind" title="ind at z80-heaven">ind</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ind</b>	</td><td>	5	</td><td>	ed aa	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="indr">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:indr" title="indr at z80-heaven">indr</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>indr</b>	</td><td>	5/6	</td><td>	ed ba	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ini">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ini" title="ini at z80-heaven">ini</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ini</b>	</td><td>	5	</td><td>	ed a2	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="inir">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:inir" title="inir at z80-heaven">inir</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>inir</b>	</td><td>	5/6	</td><td>	ed b2	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="jp">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:jp" title="jp at z80-heaven">jp</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>jp</b> nnnn		</td><td>	3	</td><td>	c3 nn nn	</td></tr>
+<tr><td>	<b>jp</b> (hl)		</td><td>	1	</td><td>	e9		</td></tr>
+<tr><td>	<b>jp</b> (ix)		</td><td>	2	</td><td>	dd e9		</td></tr>
+<tr><td>	<b>jp</b> (iy)		</td><td>	2	</td><td>	fd e9		</td></tr>
+<tr><td>	<b>jp</b> c,nnnn	</td><td>	3/3	</td><td>	da nn nn	</td></tr>
+<tr><td>	<b>jp</b> m,nnnn	</td><td>	3/3	</td><td>	fa nn nn	</td></tr>
+<tr><td>	<b>jp</b> nc,nnnn	</td><td>	3/3	</td><td>	d2 nn nn	</td></tr>
+<tr><td>	<b>jp</b> nz,nnnn	</td><td>	3/3	</td><td>	c2 nn nn	</td></tr>
+<tr><td>	<b>jp</b> p,nnnn	</td><td>	3/3	</td><td>	f2 nn nn	</td></tr>
+<tr><td>	<b>jp</b> pe,nnnn	</td><td>	3/3	</td><td>	ea nn nn	</td></tr>
+<tr><td>	<b>jp</b> po,nnnn	</td><td>	3/3	</td><td>	e2 nn nn	</td></tr>
+<tr><td>	<b>jp</b> z,nnnn	</td><td>	3/3	</td><td>	ca nn nn	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="jr">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:jr" title="jr at z80-heaven">jr</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>jr</b> nn		</td><td>	3	</td><td>	18 nn	</td></tr>
+<tr><td>	<b>jr</b> c,nn		</td><td>	2/3	</td><td>	38 nn	</td></tr>
+<tr><td>	<b>jr</b> nc,nn	</td><td>	2/3	</td><td>	30 nn	</td></tr>
+<tr><td>	<b>jr</b> nz,nn	</td><td>	2/3	</td><td>	20 nn	</td></tr>
+<tr><td>	<b>jr</b> z,nn		</td><td>	2/3	</td><td>	28 nn	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ld">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ld" title="ld at z80-heaven">ld</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ld</b> (bc),a	</td><td>	2	</td><td>	02		</td></tr>
+<tr><td>	<b>ld</b> (de),a	</td><td>	2	</td><td>	12		</td></tr>
+<tr><td>	<b>ld</b> (hl),a	</td><td>	2	</td><td>	77		</td></tr>
+<tr><td>	<b>ld</b> (hl),b	</td><td>	2	</td><td>	70		</td></tr>
+<tr><td>	<b>ld</b> (hl),c	</td><td>	2	</td><td>	71		</td></tr>
+<tr><td>	<b>ld</b> (hl),d	</td><td>	2	</td><td>	72		</td></tr>
+<tr><td>	<b>ld</b> (hl),e	</td><td>	2	</td><td>	73		</td></tr>
+<tr><td>	<b>ld</b> (hl),h	</td><td>	2	</td><td>	74		</td></tr>
+<tr><td>	<b>ld</b> (hl),l	</td><td>	2	</td><td>	75		</td></tr>
+<tr><td>	<b>ld</b> (hl),nn	</td><td>	3	</td><td>	36 nn		</td></tr>
+<tr><td>	<b>ld</b> (ix+nn),a	</td><td>	5	</td><td>	dd 77 nn	</td></tr>
+<tr><td>	<b>ld</b> (ix+nn),b	</td><td>	5	</td><td>	dd 70 nn	</td></tr>
+<tr><td>	<b>ld</b> (ix+nn),c	</td><td>	5	</td><td>	dd 71 nn	</td></tr>
+<tr><td>	<b>ld</b> (ix+nn),d	</td><td>	5	</td><td>	dd 72 nn	</td></tr>
+<tr><td>	<b>ld</b> (ix+nn),e	</td><td>	5	</td><td>	dd 73 nn	</td></tr>
+<tr><td>	<b>ld</b> (ix+nn),h	</td><td>	5	</td><td>	dd 74 nn	</td></tr>
+<tr><td>	<b>ld</b> (ix+nn),l	</td><td>	5	</td><td>	dd 75 nn	</td></tr>
+<tr><td>	<b>ld</b> (ix+nn),nn	</td><td>	6	</td><td>	dd 36 nn nn	</td></tr>
+<tr><td>	<b>ld</b> (iy+nn),a	</td><td>	5	</td><td>	fd 77 nn	</td></tr>
+<tr><td>	<b>ld</b> (iy+nn),b	</td><td>	5	</td><td>	fd 70 nn	</td></tr>
+<tr><td>	<b>ld</b> (iy+nn),c	</td><td>	5	</td><td>	fd 71 nn	</td></tr>
+<tr><td>	<b>ld</b> (iy+nn),d	</td><td>	5	</td><td>	fd 72 nn	</td></tr>
+<tr><td>	<b>ld</b> (iy+nn),e	</td><td>	5	</td><td>	fd 73 nn	</td></tr>
+<tr><td>	<b>ld</b> (iy+nn),h	</td><td>	5	</td><td>	fd 74 nn	</td></tr>
+<tr><td>	<b>ld</b> (iy+nn),l	</td><td>	5	</td><td>	fd 75 nn	</td></tr>
+<tr><td>	<b>ld</b> (iy+nn),nn	</td><td>	6	</td><td>	fd 36 nn nn	</td></tr>
+<tr><td>	<b>ld</b> (nnnn),a	</td><td>	4	</td><td>	32 nn nn	</td></tr>
+<tr><td>	<b>ld</b> (nnnn),bc	</td><td>	6	</td><td>	ed 43 nn nn	</td></tr>
+<tr><td>	<b>ld</b> (nnnn),de	</td><td>	6	</td><td>	ed 53 nn nn	</td></tr>
+<tr><td>	<b>ld</b> (nnnn),hl	</td><td>	5	</td><td>	22 nn nn	</td></tr>
+<tr><td>	<b>ld</b> (nnnn),ix	</td><td>	6	</td><td>	dd 22 nn nn	</td></tr>
+<tr><td>	<b>ld</b> (nnnn),iy	</td><td>	6	</td><td>	fd 22 nn nn	</td></tr>
+<tr><td>	<b>ld</b> (nnnn),sp	</td><td>	6	</td><td>	ed 73 nn nn	</td></tr>
+<tr><td>	<b>ld</b> a,(bc)	</td><td>	2	</td><td>	0a		</td></tr>
+<tr><td>	<b>ld</b> a,(de)	</td><td>	2	</td><td>	1a		</td></tr>
+<tr><td>	<b>ld</b> a,(hl)	</td><td>	2	</td><td>	7e		</td></tr>
+<tr><td>	<b>ld</b> a,(ix+nn)	</td><td>	5	</td><td>	dd 7e nn	</td></tr>
+<tr><td>	<b>ld</b> a,(iy+nn)	</td><td>	5	</td><td>	fd 7e nn	</td></tr>
+<tr><td>	<b>ld</b> a,(nnnn)	</td><td>	4	</td><td>	3a nn nn	</td></tr>
+<tr><td>	<b>ld</b> a,a		</td><td>	1	</td><td>	7f		</td></tr>
+<tr><td>	<b>ld</b> a,b		</td><td>	1	</td><td>	78		</td></tr>
+<tr><td>	<b>ld</b> a,c		</td><td>	1	</td><td>	79		</td></tr>
+<tr><td>	<b>ld</b> a,d		</td><td>	1	</td><td>	7a		</td></tr>
+<tr><td>	<b>ld</b> a,e		</td><td>	1	</td><td>	7b		</td></tr>
+<tr><td>	<b>ld</b> a,h		</td><td>	1	</td><td>	7c		</td></tr>
+<tr><td>	<b>ld</b> a,ixh		</td><td>	2	</td><td>	dd 7c		</td></tr>
+<tr><td>	<b>ld</b> a,iyh		</td><td>	2	</td><td>	fd 7c		</td></tr>
+<tr><td>	<b>ld</b> a,i		</td><td>	3	</td><td>	ed 57		</td></tr>
+<tr><td>	<b>ld</b> a,l		</td><td>	1	</td><td>	7d		</td></tr>
+<tr><td>	<b>ld</b> a,ixl		</td><td>	2	</td><td>	dd 7d		</td></tr>
+<tr><td>	<b>ld</b> a,iyl		</td><td>	2	</td><td>	fd 7d		</td></tr>
+<tr><td>	<b>ld</b> a,nn		</td><td>	2	</td><td>	3e nn		</td></tr>
+<tr><td>	<b>ld</b> a,r		</td><td>	3	</td><td>	ed 5f		</td></tr>
+<tr><td>	<b>ld</b> b,(hl)	</td><td>	2	</td><td>	46		</td></tr>
+<tr><td>	<b>ld</b> b,(ix+nn)	</td><td>	5	</td><td>	dd 46 nn	</td></tr>
+<tr><td>	<b>ld</b> b,(iy+nn)	</td><td>	5	</td><td>	fd 46 nn	</td></tr>
+<tr><td>	<b>ld</b> b,a		</td><td>	1	</td><td>	47		</td></tr>
+<tr><td>	<b>ld</b> b,b		</td><td>	1	</td><td>	40		</td></tr>
+<tr><td>	<b>ld</b> b,c		</td><td>	1	</td><td>	41		</td></tr>
+<tr><td>	<b>ld</b> b,d		</td><td>	1	</td><td>	42		</td></tr>
+<tr><td>	<b>ld</b> b,e		</td><td>	1	</td><td>	43		</td></tr>
+<tr><td>	<b>ld</b> b,h		</td><td>	1	</td><td>	44		</td></tr>
+<tr><td>	<b>ld</b> b,ixh		</td><td>	2	</td><td>	dd 44		</td></tr>
+<tr><td>	<b>ld</b> b,iyh		</td><td>	2	</td><td>	fd 44		</td></tr>
+<tr><td>	<b>ld</b> b,l		</td><td>	1	</td><td>	45		</td></tr>
+<tr><td>	<b>ld</b> b,ixl		</td><td>	2	</td><td>	dd 45		</td></tr>
+<tr><td>	<b>ld</b> b,iyl		</td><td>	2	</td><td>	fd 45		</td></tr>
+<tr><td>	<b>ld</b> b,nn		</td><td>	2	</td><td>	06 nn		</td></tr>
+<tr><td>	<b>ld</b> bc,(nnnn)	</td><td>	6	</td><td>	ed 4b nn nn	</td></tr>
+<tr><td>	<b>ld</b> bc,nnnn	</td><td>	3	</td><td>	01 nn nn	</td></tr>
+<tr><td>	<b>ld</b> c,(hl)	</td><td>	2	</td><td>	4e		</td></tr>
+<tr><td>	<b>ld</b> c,(ix+nn)	</td><td>	5	</td><td>	dd 4e nn	</td></tr>
+<tr><td>	<b>ld</b> c,(iy+nn)	</td><td>	5	</td><td>	fd 4e nn	</td></tr>
+<tr><td>	<b>ld</b> c,a		</td><td>	1	</td><td>	4f		</td></tr>
+<tr><td>	<b>ld</b> c,b		</td><td>	1	</td><td>	48		</td></tr>
+<tr><td>	<b>ld</b> c,c		</td><td>	1	</td><td>	49		</td></tr>
+<tr><td>	<b>ld</b> c,d		</td><td>	1	</td><td>	4a		</td></tr>
+<tr><td>	<b>ld</b> c,e		</td><td>	1	</td><td>	4b		</td></tr>
+<tr><td>	<b>ld</b> c,h		</td><td>	1	</td><td>	4c		</td></tr>
+<tr><td>	<b>ld</b> c,ixh		</td><td>	2	</td><td>	dd 4c		</td></tr>
+<tr><td>	<b>ld</b> c,iyh		</td><td>	2	</td><td>	fd 4c		</td></tr>
+<tr><td>	<b>ld</b> c,l		</td><td>	1	</td><td>	4d		</td></tr>
+<tr><td>	<b>ld</b> c,ixl		</td><td>	2	</td><td>	dd 4d		</td></tr>
+<tr><td>	<b>ld</b> c,iyl		</td><td>	2	</td><td>	fd 4d		</td></tr>
+<tr><td>	<b>ld</b> c,nn		</td><td>	2	</td><td>	0e nn		</td></tr>
+<tr><td>	<b>ld</b> d,(hl)	</td><td>	2	</td><td>	56		</td></tr>
+<tr><td>	<b>ld</b> d,(ix+nn)	</td><td>	5	</td><td>	dd 56 nn	</td></tr>
+<tr><td>	<b>ld</b> d,(iy+nn)	</td><td>	5	</td><td>	fd 56 nn	</td></tr>
+<tr><td>	<b>ld</b> d,a		</td><td>	1	</td><td>	57		</td></tr>
+<tr><td>	<b>ld</b> d,b		</td><td>	1	</td><td>	50		</td></tr>
+<tr><td>	<b>ld</b> d,c		</td><td>	1	</td><td>	51		</td></tr>
+<tr><td>	<b>ld</b> d,d		</td><td>	1	</td><td>	52		</td></tr>
+<tr><td>	<b>ld</b> d,e		</td><td>	1	</td><td>	53		</td></tr>
+<tr><td>	<b>ld</b> d,h		</td><td>	1	</td><td>	54		</td></tr>
+<tr><td>	<b>ld</b> d,ixh		</td><td>	2	</td><td>	dd 54		</td></tr>
+<tr><td>	<b>ld</b> d,iyh		</td><td>	2	</td><td>	fd 54		</td></tr>
+<tr><td>	<b>ld</b> d,l		</td><td>	1	</td><td>	55		</td></tr>
+<tr><td>	<b>ld</b> d,ixl		</td><td>	2	</td><td>	dd 55		</td></tr>
+<tr><td>	<b>ld</b> d,iyl		</td><td>	2	</td><td>	fd 55		</td></tr>
+<tr><td>	<b>ld</b> d,nn		</td><td>	2	</td><td>	16 nn		</td></tr>
+<tr><td>	<b>ld</b> de,(nnnn)	</td><td>	6	</td><td>	ed 5b nn nn	</td></tr>
+<tr><td>	<b>ld</b> de,nnnn	</td><td>	3	</td><td>	11 nn nn	</td></tr>
+<tr><td>	<b>ld</b> e,(hl)	</td><td>	2	</td><td>	5e		</td></tr>
+<tr><td>	<b>ld</b> e,(ix+nn)	</td><td>	5	</td><td>	dd 5e nn	</td></tr>
+<tr><td>	<b>ld</b> e,(iy+nn)	</td><td>	5	</td><td>	fd 5e nn	</td></tr>
+<tr><td>	<b>ld</b> e,a		</td><td>	1	</td><td>	5f		</td></tr>
+<tr><td>	<b>ld</b> e,b		</td><td>	1	</td><td>	58		</td></tr>
+<tr><td>	<b>ld</b> e,c		</td><td>	1	</td><td>	59		</td></tr>
+<tr><td>	<b>ld</b> e,d		</td><td>	1	</td><td>	5a		</td></tr>
+<tr><td>	<b>ld</b> e,e		</td><td>	1	</td><td>	5b		</td></tr>
+<tr><td>	<b>ld</b> e,h		</td><td>	1	</td><td>	5c		</td></tr>
+<tr><td>	<b>ld</b> e,ixh		</td><td>	2	</td><td>	dd 5c		</td></tr>
+<tr><td>	<b>ld</b> e,iyh		</td><td>	2	</td><td>	fd 5c		</td></tr>
+<tr><td>	<b>ld</b> e,l		</td><td>	1	</td><td>	5d		</td></tr>
+<tr><td>	<b>ld</b> e,ixl		</td><td>	2	</td><td>	dd 5d		</td></tr>
+<tr><td>	<b>ld</b> e,iyl		</td><td>	2	</td><td>	fd 5d		</td></tr>
+<tr><td>	<b>ld</b> e,nn		</td><td>	2	</td><td>	1e nn		</td></tr>
+<tr><td>	<b>ld</b> h,(hl)	</td><td>	2	</td><td>	66		</td></tr>
+<tr><td>	<b>ld</b> h,(ix+nn)	</td><td>	5	</td><td>	dd 66 nn	</td></tr>
+<tr><td>	<b>ld</b> h,(iy+nn)	</td><td>	5	</td><td>	fd 66 nn	</td></tr>
+<tr><td>	<b>ld</b> h,a		</td><td>	1	</td><td>	67		</td></tr>
+<tr><td>	<b>ld</b> h,b		</td><td>	1	</td><td>	60		</td></tr>
+<tr><td>	<b>ld</b> h,c		</td><td>	1	</td><td>	61		</td></tr>
+<tr><td>	<b>ld</b> h,d		</td><td>	1	</td><td>	62		</td></tr>
+<tr><td>	<b>ld</b> h,e		</td><td>	1	</td><td>	63		</td></tr>
+<tr><td>	<b>ld</b> h,h		</td><td>	1	</td><td>	64		</td></tr>
+<tr><td>	<b>ld</b> h,l		</td><td>	1	</td><td>	65		</td></tr>
+<tr><td>	<b>ld</b> h,nn		</td><td>	2	</td><td>	26 nn		</td></tr>
+<tr><td>	<b>ld</b> ixh,a		</td><td>	2	</td><td>	dd 67		</td></tr>
+<tr><td>	<b>ld</b> ixh,b		</td><td>	2	</td><td>	dd 60		</td></tr>
+<tr><td>	<b>ld</b> ixh,c		</td><td>	2	</td><td>	dd 61		</td></tr>
+<tr><td>	<b>ld</b> ixh,d		</td><td>	2	</td><td>	dd 62		</td></tr>
+<tr><td>	<b>ld</b> ixh,e		</td><td>	2	</td><td>	dd 63		</td></tr>
+<tr><td>	<b>ld</b> ixh,nn	</td><td>	3	</td><td>	dd 26 nn	</td></tr>
+<tr><td>	<b>ld</b> iyh,a		</td><td>	2	</td><td>	fd 67		</td></tr>
+<tr><td>	<b>ld</b> iyh,b		</td><td>	2	</td><td>	fd 60		</td></tr>
+<tr><td>	<b>ld</b> iyh,c		</td><td>	2	</td><td>	fd 61		</td></tr>
+<tr><td>	<b>ld</b> iyh,d		</td><td>	2	</td><td>	fd 62		</td></tr>
+<tr><td>	<b>ld</b> iyh,e		</td><td>	2	</td><td>	fd 63		</td></tr>
+<tr><td>	<b>ld</b> iyh,nn	</td><td>	3	</td><td>	fd 26 nn	</td></tr>
+<tr><td>	<b>ld</b> hl,(nnnn)	</td><td>	5	</td><td>	2a nn nn	</td></tr>
+<tr><td>	<b>ld</b> hl,nnnn	</td><td>	3	</td><td>	21 nn nn	</td></tr>
+<tr><td>	<b>ld</b> i,a		</td><td>	5	</td><td>	ed 47		</td></tr>
+<tr><td>	<b>ld</b> ix,(nnnn)	</td><td>	6	</td><td>	dd 2a nn nn	</td></tr>
+<tr><td>	<b>ld</b> ix,nnnn	</td><td>	4	</td><td>	dd 21 nn nn	</td></tr>
+<tr><td>	<b>ld</b> iy,(nnnn)	</td><td>	6	</td><td>	fd 2a nn nn	</td></tr>
+<tr><td>	<b>ld</b> iy,nnnn	</td><td>	4	</td><td>	fd 21 nn nn	</td></tr>
+<tr><td>	<b>ld</b> l,(hl)	</td><td>	2	</td><td>	6e		</td></tr>
+<tr><td>	<b>ld</b> l,(ix+nn)	</td><td>	5	</td><td>	dd 6e nn	</td></tr>
+<tr><td>	<b>ld</b> l,(iy+nn)	</td><td>	5	</td><td>	fd 6e nn	</td></tr>
+<tr><td>	<b>ld</b> l,a		</td><td>	1	</td><td>	6f		</td></tr>
+<tr><td>	<b>ld</b> l,b		</td><td>	1	</td><td>	68		</td></tr>
+<tr><td>	<b>ld</b> l,c		</td><td>	1	</td><td>	69		</td></tr>
+<tr><td>	<b>ld</b> l,d		</td><td>	1	</td><td>	6a		</td></tr>
+<tr><td>	<b>ld</b> l,e		</td><td>	1	</td><td>	6b		</td></tr>
+<tr><td>	<b>ld</b> l,h		</td><td>	1	</td><td>	6c		</td></tr>
+<tr><td>	<b>ld</b> l,l		</td><td>	1	</td><td>	6d		</td></tr>
+<tr><td>	<b>ld</b> l,nn		</td><td>	2	</td><td>	2e nn		</td></tr>
+<tr><td>	<b>ld</b> ixl,a		</td><td>	2	</td><td>	dd 6f		</td></tr>
+<tr><td>	<b>ld</b> ixl,b		</td><td>	2	</td><td>	dd 68		</td></tr>
+<tr><td>	<b>ld</b> ixl,c		</td><td>	2	</td><td>	dd 69		</td></tr>
+<tr><td>	<b>ld</b> ixl,d		</td><td>	2	</td><td>	dd 6a		</td></tr>
+<tr><td>	<b>ld</b> ixl,e		</td><td>	2	</td><td>	dd 6b		</td></tr>
+<tr><td>	<b>ld</b> ixl,nn	</td><td>	3	</td><td>	dd 2e nn	</td></tr>
+<tr><td>	<b>ld</b> iyl,a		</td><td>	2	</td><td>	fd 6f		</td></tr>
+<tr><td>	<b>ld</b> iyl,b		</td><td>	2	</td><td>	fd 68		</td></tr>
+<tr><td>	<b>ld</b> iyl,c		</td><td>	2	</td><td>	fd 69		</td></tr>
+<tr><td>	<b>ld</b> iyl,d		</td><td>	2	</td><td>	fd 6a		</td></tr>
+<tr><td>	<b>ld</b> iyl,e		</td><td>	2	</td><td>	fd 6b		</td></tr>
+<tr><td>	<b>ld</b> iyl,nn	</td><td>	3	</td><td>	fd 2e nn	</td></tr>
+<tr><td>	<b>ld</b> r,a		</td><td>	3	</td><td>	ed 4f		</td></tr>
+<tr><td>	<b>ld</b> sp,(nnnn)	</td><td>	6	</td><td>	ed 7b nn nn	</td></tr>
+<tr><td>	<b>ld</b> sp,hl	</td><td>	2	</td><td>	f9		</td></tr>
+<tr><td>	<b>ld</b> sp,ix	</td><td>	3	</td><td>	dd f9		</td></tr>
+<tr><td>	<b>ld</b> sp,iy	</td><td>	3	</td><td>	fd f9		</td></tr>
+<tr><td>	<b>ld</b> sp,nnnn	</td><td>	3	</td><td>	31 nn nn	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ldd">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ldd" title="ldd at z80-heaven">ldd</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ldd</b>	</td><td>	5	</td><td>	ed a8	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="lddr">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:lddr" title="lddr at z80-heaven">lddr</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>lddr</b>	</td><td>	5/6	</td><td>	ed b8	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ldi">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ldi" title="ldi at z80-heaven">ldi</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ldi</b>	</td><td>	5	</td><td>	ed a0	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ldir">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ldir" title="ldir at z80-heaven">ldir</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ldir</b>	</td><td>	5/6	</td><td>	ed b0	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="neg">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:neg" title="neg at z80-heaven">neg</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>neg</b>	</td><td>	2	</td><td>	ed 44	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="nop">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:nop" title="nop at z80-heaven">nop</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>nop</b>	</td><td>	1	</td><td>	00	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="or">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:or" title="or at z80-heaven">or</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>or</b> (hl)		</td><td>	2	</td><td>	b6		</td></tr>
+<tr><td>	<b>or</b> (ix+nn)	</td><td>	5	</td><td>	dd b6 nn	</td></tr>
+<tr><td>	<b>or</b> (iy+nn)	</td><td>	5	</td><td>	fd b6 nn	</td></tr>
+<tr><td>	<b>or</b> a		</td><td>	1	</td><td>	b7		</td></tr>
+<tr><td>	<b>or</b> b		</td><td>	1	</td><td>	b0		</td></tr>
+<tr><td>	<b>or</b> c		</td><td>	1	</td><td>	b1		</td></tr>
+<tr><td>	<b>or</b> d		</td><td>	1	</td><td>	b2		</td></tr>
+<tr><td>	<b>or</b> e		</td><td>	1	</td><td>	b3		</td></tr>
+<tr><td>	<b>or</b> h		</td><td>	1	</td><td>	b4		</td></tr>
+<tr><td>	<b>or</b> ixh		</td><td>	2	</td><td>	dd b4		</td></tr>
+<tr><td>	<b>or</b> iyh		</td><td>	2	</td><td>	fd b4		</td></tr>
+<tr><td>	<b>or</b> l		</td><td>	1	</td><td>	b5		</td></tr>
+<tr><td>	<b>or</b> ixl		</td><td>	2	</td><td>	dd b5		</td></tr>
+<tr><td>	<b>or</b> iyl		</td><td>	2	</td><td>	fd b5		</td></tr>
+<tr><td>	<b>or</b> nn		</td><td>	2	</td><td>	f6 nn		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="otdr">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:otdr" title="otdr at z80-heaven">otdr</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>otdr</b>	</td><td>	5/6	</td><td>	ed bb	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="otir">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:otir" title="otir at z80-heaven">otir</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>otir</b>	</td><td>	5/6	</td><td>	ed b3	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="out">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:out" title="out at z80-heaven">out</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>out</b> (c),a	</td><td>	4		</td><td>	ed 79	</td></tr>
+<tr><td>	<b>out</b> (c),b	</td><td>	4		</td><td>	ed 41	</td></tr>
+<tr><td>	<b>out</b> (c),c	</td><td>	4		</td><td>	ed 49	</td></tr>
+<tr><td>	<b>out</b> (c),d	</td><td>	4		</td><td>	ed 51	</td></tr>
+<tr><td>	<b>out</b> (c),e	</td><td>	4		</td><td>	ed 59	</td></tr>
+<tr><td>	<b>out</b> (c),f	</td><td>	<b>?</b>	</td><td>	ed 71	</td></tr>
+<tr><td>	<b>out</b> (c),h	</td><td>	4		</td><td>	ed 61	</td></tr>
+<tr><td>	<b>out</b> (c),l	</td><td>	4		</td><td>	ed 69	</td></tr>
+<tr><td>	<b>out</b> (nn),a	</td><td>	3		</td><td>	d3 nn	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="outd">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:outd" title="outd at z80-heaven">outd</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>outd</b>	</td><td>	5	</td><td>	ed ab	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="outi">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:outi" title="outi at z80-heaven">outi</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>outi</b>	</td><td>	5	</td><td>	ed a3	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="pop">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:pop" title="pop at z80-heaven">pop</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>pop</b> af	</td><td>	3	</td><td>	f1	</td></tr>
+<tr><td>	<b>pop</b> bc	</td><td>	3	</td><td>	c1	</td></tr>
+<tr><td>	<b>pop</b> de	</td><td>	3	</td><td>	d1	</td></tr>
+<tr><td>	<b>pop</b> hl	</td><td>	3	</td><td>	e1	</td></tr>
+<tr><td>	<b>pop</b> ix	</td><td>	5	</td><td>	dd e1	</td></tr>
+<tr><td>	<b>pop</b> iy	</td><td>	5	</td><td>	fd e1	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="push">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:push" title="push at z80-heaven">push</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>push</b> af	</td><td>	4	</td><td>	f5	</td></tr>
+<tr><td>	<b>push</b> bc	</td><td>	4	</td><td>	c5	</td></tr>
+<tr><td>	<b>push</b> de	</td><td>	4	</td><td>	d5	</td></tr>
+<tr><td>	<b>push</b> hl	</td><td>	4	</td><td>	e5	</td></tr>
+<tr><td>	<b>push</b> ix	</td><td>	5	</td><td>	dd e5	</td></tr>
+<tr><td>	<b>push</b> iy	</td><td>	5	</td><td>	fd e5	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="res">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:res" title="res at z80-heaven">res</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>res</b> 0,(hl)	</td><td>	4	</td><td>	cb 86		</td></tr>
+<tr><td>	<b>res</b> 0,(ix+nn)	</td><td>	7	</td><td>	dd cb nn 86	</td></tr>
+<tr><td>	<b>res</b> 0,(iy+nn)	</td><td>	7	</td><td>	fd cb nn 86	</td></tr>
+<tr><td>	<b>res</b> 0,a		</td><td>	2	</td><td>	cb 87		</td></tr>
+<tr><td>	<b>res</b> 0,b		</td><td>	2	</td><td>	cb 80		</td></tr>
+<tr><td>	<b>res</b> 0,c		</td><td>	2	</td><td>	cb 81		</td></tr>
+<tr><td>	<b>res</b> 0,d		</td><td>	2	</td><td>	cb 82		</td></tr>
+<tr><td>	<b>res</b> 0,e		</td><td>	2	</td><td>	cb 83		</td></tr>
+<tr><td>	<b>res</b> 0,h		</td><td>	2	</td><td>	cb 84		</td></tr>
+<tr><td>	<b>res</b> 0,l		</td><td>	2	</td><td>	cb 85		</td></tr>
+<tr><td>	<b>res</b> 1,(hl)	</td><td>	4	</td><td>	cb 8e		</td></tr>
+<tr><td>	<b>res</b> 1,(ix+nn)	</td><td>	7	</td><td>	dd cb nn 8e	</td></tr>
+<tr><td>	<b>res</b> 1,(iy+nn)	</td><td>	7	</td><td>	fd cb nn 8e	</td></tr>
+<tr><td>	<b>res</b> 1,a		</td><td>	2	</td><td>	cb 8f		</td></tr>
+<tr><td>	<b>res</b> 1,b		</td><td>	2	</td><td>	cb 88		</td></tr>
+<tr><td>	<b>res</b> 1,c		</td><td>	2	</td><td>	cb 89		</td></tr>
+<tr><td>	<b>res</b> 1,d		</td><td>	2	</td><td>	cb 8a		</td></tr>
+<tr><td>	<b>res</b> 1,e		</td><td>	2	</td><td>	cb 8b		</td></tr>
+<tr><td>	<b>res</b> 1,h		</td><td>	2	</td><td>	cb 8c		</td></tr>
+<tr><td>	<b>res</b> 1,l		</td><td>	2	</td><td>	cb 8d		</td></tr>
+<tr><td>	<b>res</b> 2,(hl)	</td><td>	4	</td><td>	cb 96		</td></tr>
+<tr><td>	<b>res</b> 2,(ix+nn)	</td><td>	7	</td><td>	dd cb nn 96	</td></tr>
+<tr><td>	<b>res</b> 2,(iy+nn)	</td><td>	7	</td><td>	fd cb nn 96	</td></tr>
+<tr><td>	<b>res</b> 2,a		</td><td>	2	</td><td>	cb 97		</td></tr>
+<tr><td>	<b>res</b> 2,b		</td><td>	2	</td><td>	cb 90		</td></tr>
+<tr><td>	<b>res</b> 2,c		</td><td>	2	</td><td>	cb 91		</td></tr>
+<tr><td>	<b>res</b> 2,d		</td><td>	2	</td><td>	cb 92		</td></tr>
+<tr><td>	<b>res</b> 2,e		</td><td>	2	</td><td>	cb 93		</td></tr>
+<tr><td>	<b>res</b> 2,h		</td><td>	2	</td><td>	cb 94		</td></tr>
+<tr><td>	<b>res</b> 2,l		</td><td>	2	</td><td>	cb 95		</td></tr>
+<tr><td>	<b>res</b> 3,(hl)	</td><td>	4	</td><td>	cb 9e		</td></tr>
+<tr><td>	<b>res</b> 3,(ix+nn)	</td><td>	7	</td><td>	dd cb nn 9e	</td></tr>
+<tr><td>	<b>res</b> 3,(iy+nn)	</td><td>	7	</td><td>	fd cb nn 9e	</td></tr>
+<tr><td>	<b>res</b> 3,a		</td><td>	2	</td><td>	cb 9f		</td></tr>
+<tr><td>	<b>res</b> 3,b		</td><td>	2	</td><td>	cb 98		</td></tr>
+<tr><td>	<b>res</b> 3,c		</td><td>	2	</td><td>	cb 99		</td></tr>
+<tr><td>	<b>res</b> 3,d		</td><td>	2	</td><td>	cb 9a		</td></tr>
+<tr><td>	<b>res</b> 3,e		</td><td>	2	</td><td>	cb 9b		</td></tr>
+<tr><td>	<b>res</b> 3,h		</td><td>	2	</td><td>	cb 9c		</td></tr>
+<tr><td>	<b>res</b> 3,l		</td><td>	2	</td><td>	cb 9d		</td></tr>
+<tr><td>	<b>res</b> 4,(hl)	</td><td>	4	</td><td>	cb a6		</td></tr>
+<tr><td>	<b>res</b> 4,(ix+nn)	</td><td>	7	</td><td>	dd cb nn a6	</td></tr>
+<tr><td>	<b>res</b> 4,(iy+nn)	</td><td>	7	</td><td>	fd cb nn a6	</td></tr>
+<tr><td>	<b>res</b> 4,a		</td><td>	2	</td><td>	cb a7		</td></tr>
+<tr><td>	<b>res</b> 4,b		</td><td>	2	</td><td>	cb a0		</td></tr>
+<tr><td>	<b>res</b> 4,c		</td><td>	2	</td><td>	cb a1		</td></tr>
+<tr><td>	<b>res</b> 4,d		</td><td>	2	</td><td>	cb a2		</td></tr>
+<tr><td>	<b>res</b> 4,e		</td><td>	2	</td><td>	cb a3		</td></tr>
+<tr><td>	<b>res</b> 4,h		</td><td>	2	</td><td>	cb a4		</td></tr>
+<tr><td>	<b>res</b> 4,l		</td><td>	2	</td><td>	cb a5		</td></tr>
+<tr><td>	<b>res</b> 5,(hl)	</td><td>	4	</td><td>	cb ae		</td></tr>
+<tr><td>	<b>res</b> 5,(ix+nn)	</td><td>	7	</td><td>	dd cb nn ae	</td></tr>
+<tr><td>	<b>res</b> 5,(iy+nn)	</td><td>	7	</td><td>	fd cb nn ae	</td></tr>
+<tr><td>	<b>res</b> 5,a		</td><td>	2	</td><td>	cb af		</td></tr>
+<tr><td>	<b>res</b> 5,b		</td><td>	2	</td><td>	cb a8		</td></tr>
+<tr><td>	<b>res</b> 5,c		</td><td>	2	</td><td>	cb a9		</td></tr>
+<tr><td>	<b>res</b> 5,d		</td><td>	2	</td><td>	cb aa		</td></tr>
+<tr><td>	<b>res</b> 5,e		</td><td>	2	</td><td>	cb ab		</td></tr>
+<tr><td>	<b>res</b> 5,h		</td><td>	2	</td><td>	cb ac		</td></tr>
+<tr><td>	<b>res</b> 5,l		</td><td>	2	</td><td>	cb ad		</td></tr>
+<tr><td>	<b>res</b> 6,(hl)	</td><td>	4	</td><td>	cb b6		</td></tr>
+<tr><td>	<b>res</b> 6,(ix+nn)	</td><td>	7	</td><td>	dd cb nn b6	</td></tr>
+<tr><td>	<b>res</b> 6,(iy+nn)	</td><td>	7	</td><td>	fd cb nn b6	</td></tr>
+<tr><td>	<b>res</b> 6,a		</td><td>	2	</td><td>	cb b7		</td></tr>
+<tr><td>	<b>res</b> 6,b		</td><td>	2	</td><td>	cb b0		</td></tr>
+<tr><td>	<b>res</b> 6,c		</td><td>	2	</td><td>	cb b1		</td></tr>
+<tr><td>	<b>res</b> 6,d		</td><td>	2	</td><td>	cb b2		</td></tr>
+<tr><td>	<b>res</b> 6,e		</td><td>	2	</td><td>	cb b3		</td></tr>
+<tr><td>	<b>res</b> 6,h		</td><td>	2	</td><td>	cb b4		</td></tr>
+<tr><td>	<b>res</b> 6,l		</td><td>	2	</td><td>	cb b5		</td></tr>
+<tr><td>	<b>res</b> 7,(hl)	</td><td>	4	</td><td>	cb be		</td></tr>
+<tr><td>	<b>res</b> 7,(ix+nn)	</td><td>	7	</td><td>	dd cb nn be	</td></tr>
+<tr><td>	<b>res</b> 7,(iy+nn)	</td><td>	7	</td><td>	fd cb nn be	</td></tr>
+<tr><td>	<b>res</b> 7,a		</td><td>	2	</td><td>	cb bf		</td></tr>
+<tr><td>	<b>res</b> 7,b		</td><td>	2	</td><td>	cb b8		</td></tr>
+<tr><td>	<b>res</b> 7,c		</td><td>	2	</td><td>	cb b9		</td></tr>
+<tr><td>	<b>res</b> 7,d		</td><td>	2	</td><td>	cb ba		</td></tr>
+<tr><td>	<b>res</b> 7,e		</td><td>	2	</td><td>	cb bb		</td></tr>
+<tr><td>	<b>res</b> 7,h		</td><td>	2	</td><td>	cb bc		</td></tr>
+<tr><td>	<b>res</b> 7,l		</td><td>	2	</td><td>	cb bd		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="ret">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:ret" title="ret at z80-heaven">ret</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>ret</b>	</td><td>	3	</td><td>	c9	</td></tr>
+<tr><td>	<b>ret</b> c	</td><td>	2/4	</td><td>	d8	</td></tr>
+<tr><td>	<b>ret</b> m	</td><td>	2/4	</td><td>	f8	</td></tr>
+<tr><td>	<b>ret</b> nc	</td><td>	2/4	</td><td>	d0	</td></tr>
+<tr><td>	<b>ret</b> nz	</td><td>	2/4	</td><td>	c0	</td></tr>
+<tr><td>	<b>ret</b> p	</td><td>	2/4	</td><td>	f0	</td></tr>
+<tr><td>	<b>ret</b> pe	</td><td>	2/4	</td><td>	e8	</td></tr>
+<tr><td>	<b>ret</b> po	</td><td>	2/4	</td><td>	e0	</td></tr>
+<tr><td>	<b>ret</b> z	</td><td>	2/4	</td><td>	c8	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="reti">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:reti" title="reti at z80-heaven">reti</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>reti</b>	</td><td>	4	</td><td>	ed 4d	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="retn">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:retn" title="retn at z80-heaven">retn</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>retn</b>	</td><td>	4	</td><td>	ed 45	</td></tr>
+</tbody>
+</table>
+
+
+<table class="instruction-table" id="rl">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rl" title="rl at z80-heaven">rl</a></th></tr>
+<tr>
+<th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-rl">
+		<use href="#svg-shift-left" x="5" />
+		<path d="M -55 0 h -10 v -20 h 130 v 20" />
+	</svg>
+</th>
+</tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rl</b> (hl)		</td><td>	4	</td><td>	cb 16		</td></tr>
+<tr><td>	<b>rl</b> (ix+nn)	</td><td>	7	</td><td>	dd cb nn 16	</td></tr>
+<tr><td>	<b>rl</b> (iy+nn)	</td><td>	7	</td><td>	fd cb nn 16	</td></tr>
+<tr><td>	<b>rl</b> a		</td><td>	2	</td><td>	cb 17		</td></tr>
+<tr><td>	<b>rl</b> b		</td><td>	2	</td><td>	cb 10		</td></tr>
+<tr><td>	<b>rl</b> c		</td><td>	2	</td><td>	cb 11		</td></tr>
+<tr><td>	<b>rl</b> d		</td><td>	2	</td><td>	cb 12		</td></tr>
+<tr><td>	<b>rl</b> e		</td><td>	2	</td><td>	cb 13		</td></tr>
+<tr><td>	<b>rl</b> h		</td><td>	2	</td><td>	cb 14		</td></tr>
+<tr><td>	<b>rl</b> l		</td><td>	2	</td><td>	cb 15		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rla">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rla" title="rla at z80-heaven">rla</a></th></tr>
+<tr>
+<th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-rla">
+		<use href="#svg-shift-left" x="5" />
+		<path d="M -55 0 h -10 v -20 h 130 v 20" />
+	</svg>
+</th>
+</tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rla</b>	</td><td>	1	</td><td>	17	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rlc">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rlc" title="rlc at z80-heaven">rlc</a></th></tr>
+<tr>
+<th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-rlc">
+		<use href="#svg-shift-left" />
+		<path d="M -10 -10 v -10 h 70 v 20" />
+	</svg>
+</th>
+</tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rlc</b> (hl)		</td><td>	4	</td><td>	cb 06		</td></tr>
+<tr><td>	<b>rlc</b> (ix+nn)	</td><td>	7	</td><td>	dd cb nn 06	</td></tr>
+<tr><td>	<b>rlc</b> (iy+nn)	</td><td>	7	</td><td>	fd cb nn 06	</td></tr>
+<tr><td>	<b>rlc</b> a		</td><td>	2	</td><td>	cb 07		</td></tr>
+<tr><td>	<b>rlc</b> b		</td><td>	2	</td><td>	cb 00		</td></tr>
+<tr><td>	<b>rlc</b> c		</td><td>	2	</td><td>	cb 01		</td></tr>
+<tr><td>	<b>rlc</b> d		</td><td>	2	</td><td>	cb 02		</td></tr>
+<tr><td>	<b>rlc</b> e		</td><td>	2	</td><td>	cb 03		</td></tr>
+<tr><td>	<b>rlc</b> h		</td><td>	2	</td><td>	cb 04		</td></tr>
+<tr><td>	<b>rlc</b> l		</td><td>	2	</td><td>	cb 05		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rlca">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rlca" title="rlca at z80-heaven">rlca</a></th></tr>
+<tr>
+<th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-rlca">
+		<use href="#svg-shift-left" />
+		<path d="M -10 -10 v -10 h 70 v 20" />
+	</svg>
+</th>
+</tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rlca</b>	</td><td>	1	</td><td>	07	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rld">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rld" title="rld at z80-heaven">rld</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rld</b>	</td><td>	5	</td><td>	ed 6f	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rr">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rr" title="rr at z80-heaven">rr</a></th></tr>
+<tr>
+<th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-rr">
+		<use href="#svg-shift-right" x="-5" />
+		<path d="M 55 0 h 10 v -20 h -130 v 20" />
+	</svg>
+</th>
+</tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rr</b> (hl)		</td><td>	4	</td><td>	cb 1e		</td></tr>
+<tr><td>	<b>rr</b> (ix+nn)	</td><td>	7	</td><td>	dd cb nn 1e	</td></tr>
+<tr><td>	<b>rr</b> (iy+nn)	</td><td>	7	</td><td>	fd cb nn 1e	</td></tr>
+<tr><td>	<b>rr</b> a		</td><td>	2	</td><td>	cb 1f		</td></tr>
+<tr><td>	<b>rr</b> b		</td><td>	2	</td><td>	cb 18		</td></tr>
+<tr><td>	<b>rr</b> c		</td><td>	2	</td><td>	cb 19		</td></tr>
+<tr><td>	<b>rr</b> d		</td><td>	2	</td><td>	cb 1a		</td></tr>
+<tr><td>	<b>rr</b> e		</td><td>	2	</td><td>	cb 1b		</td></tr>
+<tr><td>	<b>rr</b> h		</td><td>	2	</td><td>	cb 1c		</td></tr>
+<tr><td>	<b>rr</b> l		</td><td>	2	</td><td>	cb 1d		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rra">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rra" title="rra at z80-heaven">rra</a></th></tr>
+<tr>
+<th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-rra">
+		<use href="#svg-shift-right" x="-5" />
+		<path d="M 55 0 h 10 v -20 h -130 v 20" />
+	</svg>
+</th>
+</tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rra</b>	</td><td>	1	</td><td>	1f	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rrc">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rrc" title="rrc at z80-heaven">rrc</a></th></tr>
+<tr>
+<th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-rrc">
+		<use href="#svg-shift-right" />
+		<path d="M 10 -10 v -10 h -70 v 20" />
+	</svg>
+</th>
+</tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rrc</b> (hl)		</td><td>	4	</td><td>	cb 0e		</td></tr>
+<tr><td>	<b>rrc</b> (ix+nn)	</td><td>	7	</td><td>	dd cb nn 0e	</td></tr>
+<tr><td>	<b>rrc</b> (iy+nn)	</td><td>	7	</td><td>	fd cb nn 0e	</td></tr>
+<tr><td>	<b>rrc</b> a		</td><td>	2	</td><td>	cb 0f		</td></tr>
+<tr><td>	<b>rrc</b> b		</td><td>	2	</td><td>	cb 08		</td></tr>
+<tr><td>	<b>rrc</b> c		</td><td>	2	</td><td>	cb 09		</td></tr>
+<tr><td>	<b>rrc</b> d		</td><td>	2	</td><td>	cb 0a		</td></tr>
+<tr><td>	<b>rrc</b> e		</td><td>	2	</td><td>	cb 0b		</td></tr>
+<tr><td>	<b>rrc</b> h		</td><td>	2	</td><td>	cb 0c		</td></tr>
+<tr><td>	<b>rrc</b> l		</td><td>	2	</td><td>	cb 0d		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rrca">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rrca" title="rrca at z80-heaven">rrca</a></th></tr>
+<tr>
+<th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-rrc">
+		<use href="#svg-shift-right" />
+		<path d="M 10 -10 v -10 h -70 v 20" />
+	</svg>
+</th>
+</tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rrca</b>	</td><td>	1	</td><td>	0f	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rrd">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rrd" title="rrd at z80-heaven">rrd</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rrd</b>	</td><td>	5	</td><td>	ed 67	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="rst">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:rst" title="rst at z80-heaven">rst</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>rst</b> 0	</td><td>	4	</td><td>	c7	</td></tr>
+<tr><td>	<b>rst</b> 8h	</td><td>	4	</td><td>	cf	</td></tr>
+<tr><td>	<b>rst</b> 10h	</td><td>	4	</td><td>	d7	</td></tr>
+<tr><td>	<b>rst</b> 18h	</td><td>	4	</td><td>	df	</td></tr>
+<tr><td>	<b>rst</b> 20h	</td><td>	4	</td><td>	e7	</td></tr>
+<tr><td>	<b>rst</b> 28h	</td><td>	4	</td><td>	ef	</td></tr>
+<tr><td>	<b>rst</b> 30h	</td><td>	4	</td><td>	f7	</td></tr>
+<tr><td>	<b>rst</b> 38h	</td><td>	4	</td><td>	ff	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="sbc">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:sbc" title="sbc at z80-heaven">sbc</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>sbc</b> a,(hl)	</td><td>	2	</td><td>	9e		</td></tr>
+<tr><td>	<b>sbc</b> a,(ix+nn)	</td><td>	5	</td><td>	dd 9e nn	</td></tr>
+<tr><td>	<b>sbc</b> a,(iy+nn)	</td><td>	5	</td><td>	fd 9e nn	</td></tr>
+<tr><td>	<b>sbc</b> a,a		</td><td>	1	</td><td>	9f		</td></tr>
+<tr><td>	<b>sbc</b> a,b		</td><td>	1	</td><td>	98		</td></tr>
+<tr><td>	<b>sbc</b> a,c		</td><td>	1	</td><td>	99		</td></tr>
+<tr><td>	<b>sbc</b> a,d		</td><td>	1	</td><td>	9a		</td></tr>
+<tr><td>	<b>sbc</b> a,e		</td><td>	1	</td><td>	9b		</td></tr>
+<tr><td>	<b>sbc</b> a,h		</td><td>	1	</td><td>	9c		</td></tr>
+<tr><td>	<b>sbc</b> a,ixh		</td><td>	2	</td><td>	dd 9c		</td></tr>
+<tr><td>	<b>sbc</b> a,iyh		</td><td>	2	</td><td>	fd 9c		</td></tr>
+<tr><td>	<b>sbc</b> a,l		</td><td>	1	</td><td>	9d		</td></tr>
+<tr><td>	<b>sbc</b> a,ixl	</td><td>	2	</td><td>	dd 9d		</td></tr>
+<tr><td>	<b>sbc</b> a,iyl	</td><td>	2	</td><td>	fc 9d		</td></tr>
+<tr><td>	<b>sbc</b> a,nn		</td><td>	2	</td><td>	de nn		</td></tr>
+<tr><td>	<b>sbc</b> hl,bc	</td><td>	4	</td><td>	ed 42		</td></tr>
+<tr><td>	<b>sbc</b> hl,de	</td><td>	4	</td><td>	ed 52		</td></tr>
+<tr><td>	<b>sbc</b> hl,hl	</td><td>	4	</td><td>	ed 62		</td></tr>
+<tr><td>	<b>sbc</b> hl,sp	</td><td>	4	</td><td>	ed 72		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="scf">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:scf" title="scf at z80-heaven">scf</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>scf</b>	</td><td>	1	</td><td>	37	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="set">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:set" title="set at z80-heaven">set</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>set</b> 0,(hl)	</td><td>	4	</td><td>	cb c6		</td></tr>
+<tr><td>	<b>set</b> 0,(ix+nn)	</td><td>	7	</td><td>	dd cb nn c6	</td></tr>
+<tr><td>	<b>set</b> 0,(iy+nn)	</td><td>	7	</td><td>	fd cb nn c6	</td></tr>
+<tr><td>	<b>set</b> 0,a		</td><td>	2	</td><td>	cb c7		</td></tr>
+<tr><td>	<b>set</b> 0,b		</td><td>	2	</td><td>	cb c0		</td></tr>
+<tr><td>	<b>set</b> 0,c		</td><td>	2	</td><td>	cb c1		</td></tr>
+<tr><td>	<b>set</b> 0,d		</td><td>	2	</td><td>	cb c2		</td></tr>
+<tr><td>	<b>set</b> 0,e		</td><td>	2	</td><td>	cb c3		</td></tr>
+<tr><td>	<b>set</b> 0,h		</td><td>	2	</td><td>	cb c4		</td></tr>
+<tr><td>	<b>set</b> 0,l		</td><td>	2	</td><td>	cb c5		</td></tr>
+<tr><td>	<b>set</b> 1,(hl)	</td><td>	4	</td><td>	cb ce		</td></tr>
+<tr><td>	<b>set</b> 1,(ix+nn)	</td><td>	7	</td><td>	dd cb nn ce	</td></tr>
+<tr><td>	<b>set</b> 1,(iy+nn)	</td><td>	7	</td><td>	fd cb nn ce	</td></tr>
+<tr><td>	<b>set</b> 1,a		</td><td>	2	</td><td>	cb cf		</td></tr>
+<tr><td>	<b>set</b> 1,b		</td><td>	2	</td><td>	cb c8		</td></tr>
+<tr><td>	<b>set</b> 1,c		</td><td>	2	</td><td>	cb c9		</td></tr>
+<tr><td>	<b>set</b> 1,d		</td><td>	2	</td><td>	cb ca		</td></tr>
+<tr><td>	<b>set</b> 1,e		</td><td>	2	</td><td>	cb cb		</td></tr>
+<tr><td>	<b>set</b> 1,h		</td><td>	2	</td><td>	cb cc		</td></tr>
+<tr><td>	<b>set</b> 1,l		</td><td>	2	</td><td>	cb cd		</td></tr>
+<tr><td>	<b>set</b> 2,(hl)	</td><td>	4	</td><td>	cb d6		</td></tr>
+<tr><td>	<b>set</b> 2,(ix+nn)	</td><td>	7	</td><td>	dd cb nn d6	</td></tr>
+<tr><td>	<b>set</b> 2,(iy+nn)	</td><td>	7	</td><td>	fd cb nn d6	</td></tr>
+<tr><td>	<b>set</b> 2,a		</td><td>	2	</td><td>	cb d7		</td></tr>
+<tr><td>	<b>set</b> 2,b		</td><td>	2	</td><td>	cb d0		</td></tr>
+<tr><td>	<b>set</b> 2,c		</td><td>	2	</td><td>	cb d1		</td></tr>
+<tr><td>	<b>set</b> 2,d		</td><td>	2	</td><td>	cb d2		</td></tr>
+<tr><td>	<b>set</b> 2,e		</td><td>	2	</td><td>	cb d3		</td></tr>
+<tr><td>	<b>set</b> 2,h		</td><td>	2	</td><td>	cb d4		</td></tr>
+<tr><td>	<b>set</b> 2,l		</td><td>	2	</td><td>	cb d5		</td></tr>
+<tr><td>	<b>set</b> 3,(hl)	</td><td>	4	</td><td>	cb de		</td></tr>
+<tr><td>	<b>set</b> 3,(ix+nn)	</td><td>	7	</td><td>	dd cb nn de	</td></tr>
+<tr><td>	<b>set</b> 3,(iy+nn)	</td><td>	7	</td><td>	fd cb nn de	</td></tr>
+<tr><td>	<b>set</b> 3,a		</td><td>	2	</td><td>	cb df		</td></tr>
+<tr><td>	<b>set</b> 3,b		</td><td>	2	</td><td>	cb d8		</td></tr>
+<tr><td>	<b>set</b> 3,c		</td><td>	2	</td><td>	cb d9		</td></tr>
+<tr><td>	<b>set</b> 3,d		</td><td>	2	</td><td>	cb da		</td></tr>
+<tr><td>	<b>set</b> 3,e		</td><td>	2	</td><td>	cb db		</td></tr>
+<tr><td>	<b>set</b> 3,h		</td><td>	2	</td><td>	cb dc		</td></tr>
+<tr><td>	<b>set</b> 3,l		</td><td>	2	</td><td>	cb dd		</td></tr>
+<tr><td>	<b>set</b> 4,(hl)	</td><td>	4	</td><td>	cb e6		</td></tr>
+<tr><td>	<b>set</b> 4,(ix+nn)	</td><td>	7	</td><td>	dd cb nn e6	</td></tr>
+<tr><td>	<b>set</b> 4,(iy+nn)	</td><td>	7	</td><td>	fd cb nn e6	</td></tr>
+<tr><td>	<b>set</b> 4,a		</td><td>	2	</td><td>	cb e7		</td></tr>
+<tr><td>	<b>set</b> 4,b		</td><td>	2	</td><td>	cb e0		</td></tr>
+<tr><td>	<b>set</b> 4,c		</td><td>	2	</td><td>	cb e1		</td></tr>
+<tr><td>	<b>set</b> 4,d		</td><td>	2	</td><td>	cb e2		</td></tr>
+<tr><td>	<b>set</b> 4,e		</td><td>	2	</td><td>	cb e3		</td></tr>
+<tr><td>	<b>set</b> 4,h		</td><td>	2	</td><td>	cb e4		</td></tr>
+<tr><td>	<b>set</b> 4,l		</td><td>	2	</td><td>	cb e5		</td></tr>
+<tr><td>	<b>set</b> 5,(hl)	</td><td>	4	</td><td>	cb ee		</td></tr>
+<tr><td>	<b>set</b> 5,(ix+nn)	</td><td>	7	</td><td>	dd cb nn ee	</td></tr>
+<tr><td>	<b>set</b> 5,(iy+nn)	</td><td>	7	</td><td>	fd cb nn ee	</td></tr>
+<tr><td>	<b>set</b> 5,a		</td><td>	2	</td><td>	cb ef		</td></tr>
+<tr><td>	<b>set</b> 5,b		</td><td>	2	</td><td>	cb e8		</td></tr>
+<tr><td>	<b>set</b> 5,c		</td><td>	2	</td><td>	cb e9		</td></tr>
+<tr><td>	<b>set</b> 5,d		</td><td>	2	</td><td>	cb ea		</td></tr>
+<tr><td>	<b>set</b> 5,e		</td><td>	2	</td><td>	cb eb		</td></tr>
+<tr><td>	<b>set</b> 5,h		</td><td>	2	</td><td>	cb ec		</td></tr>
+<tr><td>	<b>set</b> 5,l		</td><td>	2	</td><td>	cb ed		</td></tr>
+<tr><td>	<b>set</b> 6,(hl)	</td><td>	4	</td><td>	cb f6		</td></tr>
+<tr><td>	<b>set</b> 6,(ix+nn)	</td><td>	7	</td><td>	dd cb nn f6	</td></tr>
+<tr><td>	<b>set</b> 6,(iy+nn)	</td><td>	7	</td><td>	fd cb nn f6	</td></tr>
+<tr><td>	<b>set</b> 6,a		</td><td>	2	</td><td>	cb f7		</td></tr>
+<tr><td>	<b>set</b> 6,b		</td><td>	2	</td><td>	cb f0		</td></tr>
+<tr><td>	<b>set</b> 6,c		</td><td>	2	</td><td>	cb f1		</td></tr>
+<tr><td>	<b>set</b> 6,d		</td><td>	2	</td><td>	cb f2		</td></tr>
+<tr><td>	<b>set</b> 6,e		</td><td>	2	</td><td>	cb f3		</td></tr>
+<tr><td>	<b>set</b> 6,h		</td><td>	2	</td><td>	cb f4		</td></tr>
+<tr><td>	<b>set</b> 6,l		</td><td>	2	</td><td>	cb f5		</td></tr>
+<tr><td>	<b>set</b> 7,(hl)	</td><td>	4	</td><td>	cb fe		</td></tr>
+<tr><td>	<b>set</b> 7,(ix+nn)	</td><td>	7	</td><td>	dd cb nn fe	</td></tr>
+<tr><td>	<b>set</b> 7,(iy+nn)	</td><td>	7	</td><td>	fd cb nn fe	</td></tr>
+<tr><td>	<b>set</b> 7,a		</td><td>	2	</td><td>	cb ff		</td></tr>
+<tr><td>	<b>set</b> 7,b		</td><td>	2	</td><td>	cb f8		</td></tr>
+<tr><td>	<b>set</b> 7,c		</td><td>	2	</td><td>	cb f9		</td></tr>
+<tr><td>	<b>set</b> 7,d		</td><td>	2	</td><td>	cb fa		</td></tr>
+<tr><td>	<b>set</b> 7,e		</td><td>	2	</td><td>	cb fb		</td></tr>
+<tr><td>	<b>set</b> 7,h		</td><td>	2	</td><td>	cb fc		</td></tr>
+<tr><td>	<b>set</b> 7,l		</td><td>	2	</td><td>	cb fd		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="sla">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:sla" title="sla at z80-heaven">sla</a></th></tr>
+<tr><th colspan="3">
+	<svg viewBox="-70 -11 140 22" id="svg-sla">
+		<use href="#svg-shift-left" x="-5" />
+		<text x="62">0</text>
+	</svg>
+</th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>sla</b> (hl)		</td><td>	4	</td><td>	cb 26		</td></tr>
+<tr><td>	<b>sla</b> (ix+nn)	</td><td>	7	</td><td>	dd cb nn 26	</td></tr>
+<tr><td>	<b>sla</b> (iy+nn)	</td><td>	7	</td><td>	fd cb nn 26	</td></tr>
+<tr><td>	<b>sla</b> a		</td><td>	2	</td><td>	cb 27		</td></tr>
+<tr><td>	<b>sla</b> b		</td><td>	2	</td><td>	cb 20		</td></tr>
+<tr><td>	<b>sla</b> c		</td><td>	2	</td><td>	cb 21		</td></tr>
+<tr><td>	<b>sla</b> d		</td><td>	2	</td><td>	cb 22		</td></tr>
+<tr><td>	<b>sla</b> e		</td><td>	2	</td><td>	cb 23		</td></tr>
+<tr><td>	<b>sla</b> h		</td><td>	2	</td><td>	cb 24		</td></tr>
+<tr><td>	<b>sla</b> l		</td><td>	2	</td><td>	cb 25		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="sll">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:sll" title="sll at z80-heaven">sll</a></th></tr>
+<tr><th colspan="3">
+	<svg viewBox="-70 -11 140 22" id="svg-sll">
+		<use href="#svg-shift-left" x="-5" />
+		<text x="62">1</text>
+	</svg>
+</th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>sll</b> (hl)		</td><td>	4	</td><td>	cb 36		</td></tr>
+<tr><td>	<b>sll</b> (ix+nn)	</td><td>	7	</td><td>	dd cb nn 36	</td></tr>
+<tr><td>	<b>sll</b> (iy+nn)	</td><td>	7	</td><td>	fd cb nn 36	</td></tr>
+<tr><td>	<b>sll</b> a		</td><td>	2	</td><td>	cb 37		</td></tr>
+<tr><td>	<b>sll</b> b		</td><td>	2	</td><td>	cb 30		</td></tr>
+<tr><td>	<b>sll</b> c		</td><td>	2	</td><td>	cb 31		</td></tr>
+<tr><td>	<b>sll</b> d		</td><td>	2	</td><td>	cb 32		</td></tr>
+<tr><td>	<b>sll</b> e		</td><td>	2	</td><td>	cb 33		</td></tr>
+<tr><td>	<b>sll</b> h		</td><td>	2	</td><td>	cb 34		</td></tr>
+<tr><td>	<b>sll</b> l		</td><td>	2	</td><td>	cb 35		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="sra">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:sra" title="sra at z80-heaven">sra</a></th></tr>
+<tr><th colspan="3">
+	<svg viewBox="-70 -21 140 32" id="svg-sra">
+		<use href="#svg-shift-right" />
+		<path d="M -60 0 v -20 h 30 v 10" />
+	</svg>
+</th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>sra</b> (hl)		</td><td>	4	</td><td>	cb 2e		</td></tr>
+<tr><td>	<b>sra</b> (ix+nn)	</td><td>	7	</td><td>	dd cb nn 2e	</td></tr>
+<tr><td>	<b>sra</b> (iy+nn)	</td><td>	7	</td><td>	fd cb nn 2e	</td></tr>
+<tr><td>	<b>sra</b> a		</td><td>	2	</td><td>	cb 2f		</td></tr>
+<tr><td>	<b>sra</b> b		</td><td>	2	</td><td>	cb 28		</td></tr>
+<tr><td>	<b>sra</b> c		</td><td>	2	</td><td>	cb 29		</td></tr>
+<tr><td>	<b>sra</b> d		</td><td>	2	</td><td>	cb 2a		</td></tr>
+<tr><td>	<b>sra</b> e		</td><td>	2	</td><td>	cb 2b		</td></tr>
+<tr><td>	<b>sra</b> h		</td><td>	2	</td><td>	cb 2c		</td></tr>
+<tr><td>	<b>sra</b> l		</td><td>	2	</td><td>	cb 2d		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="srl">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:srl" title="srl at z80-heaven">srl</a></th></tr>
+<tr><th colspan="3">
+	<svg viewBox="-70 -11 140 22" id="svg-srl">
+		<use href="#svg-shift-right" x="5" />
+		<text x="-62">0</text>
+	</svg>
+</th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>srl</b> (hl)		</td><td>	4	</td><td>	cb 3e	</td></tr>
+<tr><td>	<b>srl</b> (ix+nn)	</td><td>	7	</td><td>	cb 3e	</td></tr>
+<tr><td>	<b>srl</b> (iy+nn)	</td><td>	7	</td><td>	cb 3e	</td></tr>
+<tr><td>	<b>srl</b> a		</td><td>	2	</td><td>	cb 3f	</td></tr>
+<tr><td>	<b>srl</b> b		</td><td>	2	</td><td>	cb 38	</td></tr>
+<tr><td>	<b>srl</b> c		</td><td>	2	</td><td>	cb 39	</td></tr>
+<tr><td>	<b>srl</b> d		</td><td>	2	</td><td>	cb 3a	</td></tr>
+<tr><td>	<b>srl</b> e		</td><td>	2	</td><td>	cb 3b	</td></tr>
+<tr><td>	<b>srl</b> h		</td><td>	2	</td><td>	cb 3c	</td></tr>
+<tr><td>	<b>srl</b> l		</td><td>	2	</td><td>	cb 3d	</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="sub">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:sub" title="sub at z80-heaven">sub</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>sub</b> (hl)		</td><td>	2	</td><td>	96		</td></tr>
+<tr><td>	<b>sub</b> (ix+nn)	</td><td>	5	</td><td>	dd 96 nn	</td></tr>
+<tr><td>	<b>sub</b> (iy+nn)	</td><td>	5	</td><td>	fd 96 nn	</td></tr>
+<tr><td>	<b>sub</b> a		</td><td>	1	</td><td>	97		</td></tr>
+<tr><td>	<b>sub</b> b		</td><td>	1	</td><td>	90		</td></tr>
+<tr><td>	<b>sub</b> c		</td><td>	1	</td><td>	91		</td></tr>
+<tr><td>	<b>sub</b> d		</td><td>	1	</td><td>	92		</td></tr>
+<tr><td>	<b>sub</b> e		</td><td>	1	</td><td>	93		</td></tr>
+<tr><td>	<b>sub</b> h		</td><td>	1	</td><td>	94		</td></tr>
+<tr><td>	<b>sub</b> ixh		</td><td>	2	</td><td>	ff 94		</td></tr>
+<tr><td>	<b>sub</b> iyh		</td><td>	2	</td><td>	fd 94		</td></tr>
+<tr><td>	<b>sub</b> l		</td><td>	1	</td><td>	95		</td></tr>
+<tr><td>	<b>sub</b> ixl		</td><td>	2	</td><td>	ff 95		</td></tr>
+<tr><td>	<b>sub</b> iyl		</td><td>	2	</td><td>	fd 95		</td></tr>
+<tr><td>	<b>sub</b> nn		</td><td>	2	</td><td>	d6 nn		</td></tr>
+</tbody>
+</table>
+
+<table class="instruction-table" id="xor">
+<thead>
+<tr><th colspan="3"><a href="http://z80-heaven.wikidot.com/instructions-set:xor" title="xor at z80-heaven">xor</a></th></tr>
+<tr><th>instruction</th><th>nops</th><th>bytes</th></tr>
+</thead>
+<tbody>
+<tr><td>	<b>xor</b> (hl)		</td><td>	2	</td><td>	ae		</td></tr>
+<tr><td>	<b>xor</b> (ix+nn)	</td><td>	5	</td><td>	dd ae nn	</td></tr>
+<tr><td>	<b>xor</b> (iy+nn)	</td><td>	5	</td><td>	fd ae nn	</td></tr>
+<tr><td>	<b>xor</b> a		</td><td>	1	</td><td>	af		</td></tr>
+<tr><td>	<b>xor</b> b		</td><td>	1	</td><td>	a8		</td></tr>
+<tr><td>	<b>xor</b> c		</td><td>	1	</td><td>	a9		</td></tr>
+<tr><td>	<b>xor</b> d		</td><td>	1	</td><td>	aa		</td></tr>
+<tr><td>	<b>xor</b> e		</td><td>	1	</td><td>	ab		</td></tr>
+<tr><td>	<b>xor</b> h		</td><td>	1	</td><td>	ac		</td></tr>
+<tr><td>	<b>xor</b> ixh		</td><td>	2	</td><td>	dd ac		</td></tr>
+<tr><td>	<b>xor</b> iyh		</td><td>	2	</td><td>	fd ac		</td></tr>
+<tr><td>	<b>xor</b> l		</td><td>	1	</td><td>	ad		</td></tr>
+<tr><td>	<b>xor</b> ixl		</td><td>	2	</td><td>	dd ad		</td></tr>
+<tr><td>	<b>xor</b> iyl		</td><td>	2	</td><td>	fd ad		</td></tr>
+<tr><td>	<b>xor</b> nn		</td><td>	2	</td><td>	ee nn		</td></tr>
+</tbody>
+</table>
+
+<footer>
+	Thanks to:<br/>
+	<a href="http://jgmalcolm.com/z80/opcodes/opcodesN.htm">http://jgmalcolm.com/z80/opcodes/opcodesN.htm</a><br/>
+	<a href="http://www.cpc-power.com/cpcarchives/index.php?page=articles&amp;num=65">http://www.cpc-power.com/cpcarchives/index.php?page=articles&amp;num=65</a><br/>
+	<a href="http://z80-heaven.wikidot.com/instructions-set">http://z80-heaven.wikidot.com/instructions-set</a><br/>
+	<a href="http://www.z80.info/z80undoc.htm">http://www.z80.info/z80undoc.htm</a>
+</footer>
+
+<div class="fixed">
+	<div class="fixed-inner">
+		<a href="#title">
+			<div class="scroll-to-top">
+				<svg class="icon-button" role="button" viewBox="0 0 284.929 284.929">
+					<title>Scroll to top</title>
+					<path d="M17.128,167.872c1.903,1.902,4.093,2.854,6.567,2.854c2.474,0,4.664-0.952,6.567-2.854L142.466,55.666l112.208,112.206
+						c1.902,1.902,4.093,2.854,6.563,2.854c2.478,0,4.668-0.952,6.57-2.854l14.274-14.277c1.902-1.902,2.847-4.093,2.847-6.563
+						c0-2.475-0.951-4.665-2.847-6.567L149.028,7.419c-1.901-1.906-4.088-2.853-6.562-2.853s-4.665,0.95-6.567,2.853L2.856,140.464
+						C0.95,142.367,0,144.554,0,147.034c0,2.468,0.953,4.658,2.856,6.561L17.128,167.872z"/>
+					<path d="M149.028,117.055c-1.901-1.906-4.088-2.856-6.562-2.856s-4.665,0.953-6.567,2.856L2.856,250.1
+						C0.95,252.003,0,254.192,0,256.67c0,2.472,0.953,4.661,2.856,6.564l14.272,14.276c1.903,1.903,4.093,2.848,6.567,2.848
+						c2.474,0,4.664-0.951,6.567-2.848l112.204-112.209l112.208,112.209c1.902,1.903,4.093,2.852,6.563,2.852
+						c2.478,0,4.668-0.948,6.57-2.852l14.274-14.276c1.902-1.903,2.847-4.093,2.847-6.564c0-2.478-0.951-4.667-2.847-6.57
+						L149.028,117.055z"/>
+				</svg>
+			</div>
+		</a>
+		<div class="quick-search">
+			<input id="quick-search"></input>
+			<svg class="icon-button search-button" role="button" viewBox="0 0 475.084 475.084">
+				<title>Open quick search</title>
+				<path d="M464.524,412.846l-97.929-97.925c23.6-34.068,35.406-72.047,35.406-113.917c0-27.218-5.284-53.249-15.852-78.087
+					c-10.561-24.842-24.838-46.254-42.825-64.241c-17.987-17.987-39.396-32.264-64.233-42.826
+					C254.246,5.285,228.217,0.003,200.999,0.003c-27.216,0-53.247,5.282-78.085,15.847C98.072,26.412,76.66,40.689,58.673,58.676
+					c-17.989,17.987-32.264,39.403-42.827,64.241C5.282,147.758,0,173.786,0,201.004c0,27.216,5.282,53.238,15.846,78.083
+					c10.562,24.838,24.838,46.247,42.827,64.234c17.987,17.993,39.403,32.264,64.241,42.832c24.841,10.563,50.869,15.844,78.085,15.844
+					c41.879,0,79.852-11.807,113.922-35.405l97.929,97.641c6.852,7.231,15.406,10.849,25.693,10.849
+					c9.897,0,18.467-3.617,25.694-10.849c7.23-7.23,10.848-15.796,10.848-25.693C475.088,428.458,471.567,419.889,464.524,412.846z
+					 M291.363,291.358c-25.029,25.033-55.148,37.549-90.364,37.549c-35.21,0-65.329-12.519-90.36-37.549
+					c-25.031-25.029-37.546-55.144-37.546-90.36c0-35.21,12.518-65.334,37.546-90.36c25.026-25.032,55.15-37.546,90.36-37.546
+					c35.212,0,65.331,12.519,90.364,37.546c25.033,25.026,37.548,55.15,37.548,90.36C328.911,236.214,316.392,266.329,291.363,291.358z"/>
+			</svg>
+			<svg class="icon-button close-button" role="button" viewBox="20 20 488 488">
+				<title>Close quick search</title>
+				<path d="M443.6,387.1L312.4,255.4l131.5-130c5.4-5.4,5.4-14.2,0-19.6l-37.4-37.6c-2.6-2.6-6.1-4-9.8-4c-3.7,0-7.2,1.5-9.8,4
+					L256,197.8L124.9,68.3c-2.6-2.6-6.1-4-9.8-4c-3.7,0-7.2,1.5-9.8,4L68,105.9c-5.4,5.4-5.4,14.2,0,19.6l131.5,130L68.4,387.1
+					c-2.6,2.6-4.1,6.1-4.1,9.8c0,3.7,1.4,7.2,4.1,9.8l37.4,37.6c2.7,2.7,6.2,4.1,9.8,4.1c3.5,0,7.1-1.3,9.8-4.1L256,313.1l130.7,131.1
+					c2.7,2.7,6.2,4.1,9.8,4.1c3.5,0,7.1-1.3,9.8-4.1l37.4-37.6c2.6-2.6,4.1-6.1,4.1-9.8C447.7,393.2,446.2,389.7,443.6,387.1z"/>
+			</svg>
+		</div>
+	</div>
+</div>
+
+<script>
+(function () {
+	function scrollToPosition(position) {
+		window.scrollTo(window.scrollX, position);
+	}
+
+	function scrollToMatchingElement(str) {
+		var element = findMatchingElement(str);
+
+		if (element) {
+			scrollToElement(element);
+		}
+	}
+
+	function findMatchingElement(str) {
+		var table, row;
+
+		str = str.trim().toLowerCase().replace(/\s+/g, ' ');
+		table = findMatchingTable(str);
+		if (table && str.indexOf(' ') !== -1) {
+			row = findMatchingCell(table, str);
+		}
+
+		return row || table;
+	}
+
+	function scrollToElement(element) {
+		element.scrollIntoView();
+	}
+
+	function findMatchingTable(str) {
+		var instruction = extractInstruction(str);
+		var table = null;
+
+		if (instruction) {
+			table = document.querySelector('[id^=' + instruction + ']');
+		}
+
+		return table;
+	}
+
+	function findMatchingCell(table, str) {
+		var cells, i, cell, text;
+
+		if (table) {
+			cells = table.querySelectorAll('td:first-child');
+
+			for (i = 0; i < cells.length; ++i) {
+				cell = cells[i];
+				text = cell.innerText.slice(0, str.length);
+
+				if (text === str) {
+					return cell;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	function extractInstruction(str) {
+		var r = /^[a-z0-9]+/i;
+		var match = str.match(r);
+
+		return match && match[0] || '';
+	}
+
+	function overrideAnchorLinks() {
+		var links = document.querySelectorAll('a');
+
+		links.forEach(function (link) {
+			var href = link.getAttribute('href');
+			var targetId, target;
+
+			if (href.charAt(0) === '#') {
+				targetId = href.slice(1);
+				target = document.getElementById(targetId);
+
+				if (target) {
+					link.addEventListener('click', function (event) {
+						scrollToElement(target);
+						event.preventDefault();
+					});
+				}
+			}
+		});
+	}
+
+	var quickSearchIsOpen = false;
+	var quickSearchElement = document.querySelector('.quick-search');
+	var quickSearchIcons = document.querySelectorAll('.quick-search .icon-button');
+	var quickSearchInput = document.querySelector('.quick-search input');
+	var quickSearchPrevScrollPos = 0;
+
+	function initialiseQuickSearch() {
+		// toggle quick search if icon is pressed
+		quickSearchIcons.forEach(function (iconElement) {
+			iconElement.addEventListener('click', function (event) {
+				(quickSearchIsOpen ? closeQuickSearch : openQuickSearch)();
+			});
+		});
+
+		// when quick search text changes then scroll to matching element
+		quickSearchInput.addEventListener('input', function (event) {
+			if (!quickSearchInput.value) {
+				scrollToPosition(quickSearchPrevScrollPos);
+			}
+			else {
+				scrollToMatchingElement(quickSearchInput.value);
+			}
+		});
+
+		// close quick search if escape or enter pressed
+		quickSearchInput.addEventListener('keydown', function (event) {
+			var isEscape = event.key === 'Escape' || event.which === 27;
+			var isEnter = event.key === 'Enter' || event.which === 13;
+
+			if (quickSearchIsOpen && (isEscape || isEnter)) {
+				closeQuickSearch();
+				event.preventDefault();
+			}
+		});
+
+		// open quick search if space or enter is pressed
+		document.addEventListener('keypress', function (event) {
+			var key = event.key || String.fromCharCode(event.which);
+			var isEnter = event.key === 'Enter' || event.which === 13;
+
+			if (!quickSearchIsOpen && (isEnter || key === ' ')) {
+				openQuickSearch();
+				event.preventDefault();
+			}
+		});
+	}
+
+	function openQuickSearch() {
+		quickSearchIsOpen = true;
+		quickSearchPrevScrollPos = window.scrollY;
+		quickSearchElement.classList.add('open');
+		quickSearchInput.focus();
+		quickSearchInput.addEventListener('blur', closeQuickSearch);
+	}
+
+	function closeQuickSearch() {
+		quickSearchIsOpen = false;
+		quickSearchElement.classList.remove('open');
+		quickSearchInput.value = '';
+		quickSearchInput.removeEventListener('blur', closeQuickSearch);
+	}
+
+	// override anchor links with js
+	overrideAnchorLinks();
+	// search for a mnemonic by typing its name
+	initialiseQuickSearch();
+})();
+</script>
+
+</body>
+</html>

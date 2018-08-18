@@ -1,0 +1,11 @@
+{
+  "name": "z80-nops",
+  "version": "1.0.0",
+  "description": "Z80 instructions and timing for Amstrad CPC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "borilla",
+  "license": "MIT"
+}

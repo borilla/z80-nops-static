@@ -4,7 +4,9 @@
   "description": "Z80 instructions and timing for Amstrad CPC",
   "main": "index.js",
   "scripts": {
-    "cypress:open": "cypress open"
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test": "npm run cypress:run"
   },
   "author": "borilla",
   "license": "MIT",

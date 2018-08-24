@@ -16,7 +16,16 @@ context('scroll-to-top button', () => {
 		it('scrolls to top of page', () => {
 			cy.window().then($window => {
 				expect($window.scrollY).to.equal(0);
+
 			});
+		});
+
+		it('makes title visible in viewport', () => {
+			cy.get('h1').should('be.inViewport');
+		});
+
+		it('makes footer not visible in viewport', () => {
+			cy.get('title').should('not.be.inViewport');
 		});
 	});
 });

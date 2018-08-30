@@ -1,5 +1,5 @@
 {
-  "name": "z80-nops",
+  "name": "z80-nops-static",
   "version": "1.0.0",
   "description": "Z80 instructions and timing for Amstrad CPC",
   "main": "index.js",

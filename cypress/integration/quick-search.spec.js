@@ -7,28 +7,61 @@ context('quick-search', () => {
 		assertQuickSearchIsClosed();
 	});
 
-	context('when open-quick-search button is clicked', () => {
+	context('opening quick-search', () => {
+		context('when open-quick-search button is clicked', () => {
+			beforeEach(() => {
+				cy.get('.search-button').click();
+			});
+
+			assertQuickSearchIsOpened();
+		});
+
+		context('when space is pressed', () => {
+			beforeEach(() => {
+				cy.document().trigger('keypress', { key: ' ' });
+			});
+	
+			assertQuickSearchIsOpened();
+		});
+	
+		context('when enter is pressed', () => {
+			beforeEach(() => {
+				cy.document().trigger('keypress', { key: 'Enter' });
+			});
+	
+			assertQuickSearchIsOpened();
+		});
+	});
+
+	context('closing quick-search', () => {
 		beforeEach(() => {
 			cy.get('.search-button').click();
 		});
 
-		assertQuickSearchIsOpened();
-	});
+		context('when quick-search input loses focus', () => {
+			beforeEach(() => {
+				cy.get('#quick-search').trigger('blur');
+			});
 
-	context('when space is pressed', () => {
-		beforeEach(() => {
-			cy.document().trigger('keypress', { key: ' ' });
+			assertQuickSearchIsClosed();
 		});
 
-		assertQuickSearchIsOpened();
-	});
+		// NOTE: below test doesn't work as "blur" is actually triggered before "click"
+		context.skip('when quick-search-close button is clicked', () => {
+			beforeEach(() => {
+				cy.get('.close-button').click();
+			});
 
-	context('when enter is pressed', () => {
-		beforeEach(() => {
-			cy.document().trigger('keypress', { key: 'Enter' });
+			assertQuickSearchIsClosed();
 		});
 
-		assertQuickSearchIsOpened();
+		context('when escape is pressed', () => {
+			beforeEach(() => {
+				cy.get('#quick-search').trigger('keydown', { key: 'Escape' });
+			});
+
+			assertQuickSearchIsClosed();
+		});
 	});
 });
 

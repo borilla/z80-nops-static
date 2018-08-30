@@ -46,10 +46,10 @@ context('quick-search', () => {
 			assertQuickSearchIsClosed();
 		});
 
-		// NOTE: below test doesn't work as "blur" is actually triggered before "click"
-		context.skip('when quick-search-close button is clicked', () => {
+		context('when quick-search-close button is clicked', () => {
 			beforeEach(() => {
-				cy.get('.close-button').click();
+				// NOTE: Use "trigger()" rather than "click()" to avoid "blur" on input element happening before "click"
+				cy.get('.close-button').trigger('click');
 			});
 
 			assertQuickSearchIsClosed();

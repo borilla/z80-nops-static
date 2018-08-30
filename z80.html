@@ -2025,7 +2025,7 @@
 		// toggle quick search if icon is pressed
 		quickSearchIcons.forEach(function (iconElement) {
 			iconElement.addEventListener('click', function (event) {
-				(quickSearchIsOpen ? closeQuickSearch : openQuickSearch)();
+				(quickSearchIsOpen ? closeQuickSearch : openQuickSearch)(event);
 			});
 		});
 
@@ -2045,7 +2045,7 @@
 			var isEnter = event.key === 'Enter' || event.which === 13;
 
 			if (quickSearchIsOpen && (isEscape || isEnter)) {
-				closeQuickSearch();
+				closeQuickSearch(event);
 				event.preventDefault();
 			}
 		});
@@ -2056,13 +2056,14 @@
 			var isEnter = event.key === 'Enter' || event.which === 13;
 
 			if (!quickSearchIsOpen && (isEnter || key === ' ')) {
-				openQuickSearch();
+				openQuickSearch(event);
 				event.preventDefault();
 			}
 		});
 	}
 
-	function openQuickSearch() {
+	function openQuickSearch(event) {
+		// console.log('openQuickSearch', event.type);
 		quickSearchIsOpen = true;
 		quickSearchPrevScrollPos = window.scrollY;
 		quickSearchElement.classList.add('open');
@@ -2070,7 +2071,8 @@
 		quickSearchInput.addEventListener('blur', closeQuickSearch);
 	}
 
-	function closeQuickSearch() {
+	function closeQuickSearch(event) {
+		// console.log('closeQuickSearch', event.type);
 		quickSearchIsOpen = false;
 		quickSearchElement.classList.remove('open');
 		quickSearchInput.value = '';

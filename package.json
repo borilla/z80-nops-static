@@ -11,6 +11,7 @@
   "author": "borilla",
   "license": "MIT",
   "devDependencies": {
+    "chai-in-viewport": "^1.0.3",
     "cypress": "^3.1.0",
     "eslint-plugin-cypress": "^2.0.1"
   }

@@ -2,3 +2,4 @@ node_modules/
 cypress/fixtures/
 cypress/integration/examples/
 cypress/screenshots/
+cypress/videos/
